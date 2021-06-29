@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="30">CVU: Computer Vision Utils
+# <img src="static/logo.png" width="30"> CVU: Computer Vision Utils
 
 ![status](https://img.shields.io/pypi/status/ansicolortags.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
