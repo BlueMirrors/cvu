@@ -4,6 +4,7 @@ from collections import Counter
 import numpy as np
 
 from cvu.interface.predictions import IPrediction, IPredictions
+from cvu.utils.draw import draw_bbox
 
 
 class Prediction(IPrediction):
@@ -41,7 +42,7 @@ class Prediction(IPrediction):
                 "bottom-right:({self.bbox[2]}, {self.bbox[3]})")
 
     def draw(self, image):
-        pass
+        draw_bbox(image, self.bbox)
 
 
 class Predictions(IPredictions):
