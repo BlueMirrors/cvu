@@ -74,4 +74,4 @@ class Yolov5(ICore):
         self._configs['postprocess'] = postprocess
 
     def __repr__(self):
-        return ''
+        return str(self._model)
