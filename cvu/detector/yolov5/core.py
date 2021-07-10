@@ -14,6 +14,7 @@ class Yolov5(ICore):
                  classes: Union[str, List[str]],
                  backend: str = "torch-jit",
                  weight: str = "yolov5s",
+                 device: str = "auto",
                  inplace: bool = False) -> None:
 
         self._configs = {
@@ -26,7 +27,7 @@ class Yolov5(ICore):
 
         self._model = None
 
-        self._load_backend(backend, weight)
+        self._load_backend(backend, weight, device)
 
     def __call__(self, inputs):
         if not self._configs['inplace']:
@@ -56,13 +57,13 @@ class Yolov5(ICore):
             value = func(value)
         return value
 
-    def _load_backend(self, backend, weight):
+    def _load_backend(self, backend, weight, device):
         preprocess = [letterbox, bgr_to_rgb]
         postprocess = []
 
         if backend == 'torch-jit':
             from .backends.yolov5_torch import Yolov5
-            self._model = Yolov5(weight)
+            self._model = Yolov5(weight, device)
 
             # add preprocess
             preprocess.append(hwc_to_whc)
