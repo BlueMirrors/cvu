@@ -72,6 +72,19 @@ class Predictions(IPredictions):
                 map(lambda obj: getattr(obj, 'class_name'), self._objects))
         return self._count
 
+    def create_and_append(self,
+                          bbox,
+                          confidence,
+                          class_id,
+                          obj_id=None,
+                          class_name=None):
+
+        prediction = Prediction(
+            (len(self._objects) if obj_id is None else obj_id), bbox,
+            confidence, class_id, class_name)
+
+        self._objects.append(prediction)
+
     def append(self, object_):
         self._objects.append(object_)
 
