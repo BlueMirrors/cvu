@@ -59,6 +59,9 @@ class Predictions(IPredictions):
     def __getitem__(self, key) -> Prediction:
         return self._objects[key]
 
+    def __len__(self) -> int:
+        return len(self._objects)
+
     def __repr__(self) -> str:
         return '\n'.join(map(str, self._objects))
 
