@@ -7,6 +7,7 @@ from cvu.detector.predictions import Predictions
 from cvu.preprocess.image.letterbox import letterbox
 from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_whc
 from cvu.postprocess.bbox import scale_coords
+from cvu.utils.backend import setup_backend
 
 
 class Yolov5(ICore):
@@ -26,7 +27,7 @@ class Yolov5(ICore):
         }
 
         self._model = None
-
+        setup_backend(backend)
         self._load_backend(backend, weight, device)
 
     def __call__(self, inputs):
