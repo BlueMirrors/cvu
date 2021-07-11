@@ -21,6 +21,7 @@ def draw_bbox(image: np.ndarray,
 
     if title:
         cv2.putText(image, title, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                    min(image.shape[0], image.shape[1]) / (25 / 0.9), color, 2)
+                    min(image.shape[0], image.shape[1]) / (1280 / 0.9), color,
+                    2)
 
     cv2.rectangle(image, (x1, y1), (x2, y2), color=color, thickness=thickness)
