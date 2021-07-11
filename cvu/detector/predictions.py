@@ -12,8 +12,8 @@ class Prediction(IPrediction):
                  class_id: int, class_name: str) -> None:
         self._obj_id = obj_id
         self._bbox = bbox
-        self._confidence = confidence
-        self._class_id = class_id
+        self._confidence = round(float(confidence), 2)
+        self._class_id = int(class_id)
         self._class_name = class_name
 
     @property
@@ -42,7 +42,8 @@ class Prediction(IPrediction):
                 "bottom-right:({self.bbox[2]}, {self.bbox[3]})")
 
     def draw(self, image):
-        draw_bbox(image, self.bbox)
+        title = f"{self.obj_id}-{self.class_id}-{self.confidence}"
+        draw_bbox(image, self.bbox, title=title)
 
 
 class Predictions(IPredictions):
