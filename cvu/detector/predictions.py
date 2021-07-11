@@ -42,7 +42,7 @@ class Prediction(IPrediction):
                 "bottom-right:({self.bbox[2]}, {self.bbox[3]})")
 
     def draw(self, image):
-        title = f"{self.obj_id}-{self.class_id}-{self.confidence}"
+        title = f"{self.obj_id}.{self.class_name}({self.confidence})"
         draw_bbox(image, self.bbox, title=title)
 
 
