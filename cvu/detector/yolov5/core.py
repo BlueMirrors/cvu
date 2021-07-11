@@ -5,6 +5,7 @@ import numpy as np
 
 from cvu.interface.core import ICore
 from cvu.detector.predictions import Predictions
+from cvu.detector.configs import COMMON_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
 from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_whc
 from cvu.postprocess.bbox import scale_coords
@@ -22,12 +23,13 @@ class Yolov5(ICore):
 
         self._preprocess = [letterbox, bgr_to_rgb]
         self._postprocess = []
-        self._classes = classes
+        self._classes = {}
         self._model = None
 
         # setup backend and load model
         setup_backend(backend, device if device != "auto" else None)
         self._load_model(backend, weight, device)
+        self._load_classes(classes)
 
     def __call__(self, inputs):
         # preprocess
@@ -56,7 +58,11 @@ class Yolov5(ICore):
     def _to_preds(self, outputs):
         preds = Predictions()
         for *xyxy, conf, class_id in reversed(outputs):
-            preds.create_and_append(xyxy, conf, class_id)
+            if class_id in self._classes:
+                preds.create_and_append(xyxy,
+                                        conf,
+                                        class_id,
+                                        class_name=self._classes[class_id])
         return preds
 
     def _apply(self, value, functions):
@@ -75,6 +81,20 @@ class Yolov5(ICore):
 
         # contigousarray
         self._preprocess.append(np.ascontiguousarray)
+
+    def _load_classes(self, classes):
+        if classes == 'coco':
+            classes = COMMON_CLASSES.COCO
+
+        elif isinstance(classes, str):
+            classes = [classes]
+
+        if set(classes).issubset(COMMON_CLASSES.COCO):
+            for i, name in enumerate(COMMON_CLASSES.COCO):
+                if name in classes:
+                    self._classes[i] = name
+        else:
+            self._classes = {i: name for i, name in enumerate(classes)}
 
     def __repr__(self):
         return str(self._model)
