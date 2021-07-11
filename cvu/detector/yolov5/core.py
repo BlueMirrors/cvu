@@ -13,7 +13,7 @@ from cvu.utils.backend import setup_backend
 class Yolov5(ICore):
     def __init__(self,
                  classes: Union[str, List[str]],
-                 backend: str = "torch-jit",
+                 backend: str = "torch",
                  weight: str = "yolov5s",
                  device: str = "auto",
                  inplace: bool = False) -> None:
@@ -62,7 +62,7 @@ class Yolov5(ICore):
         preprocess = [letterbox, bgr_to_rgb]
         postprocess = []
 
-        if backend == 'torch-jit':
+        if backend == 'torch':
             from .backends.yolov5_torch import Yolov5
             self._model = Yolov5(weight, device)
 
