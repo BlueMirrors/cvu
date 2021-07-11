@@ -1,4 +1,5 @@
 from typing import Union, List
+from importlib import import_module
 
 import numpy as np
 
@@ -11,41 +12,46 @@ from cvu.utils.backend import setup_backend
 
 
 class Yolov5(ICore):
+    _BACKEND_PKG = "cvu.detector.yolov5.backends"
+
     def __init__(self,
                  classes: Union[str, List[str]],
                  backend: str = "torch",
                  weight: str = "yolov5s",
-                 device: str = "auto",
-                 inplace: bool = False) -> None:
+                 device: str = "auto") -> None:
 
-        self._configs = {
-            'inplace': inplace,
-            'backend': backend,
-            'classes': classes,
-            'preprocess': [],
-            'postprocess': []
-        }
-
+        self._preprocess = [letterbox, bgr_to_rgb]
+        self._postprocess = []
+        self._classes = classes
         self._model = None
+
+        # setup backend and load model
         setup_backend(backend, device if device != "auto" else None)
-        self._load_backend(backend, weight, device)
+        self._load_model(backend, weight, device)
 
     def __call__(self, inputs):
-        if not self._configs['inplace']:
-            inputs = inputs.copy()
+        # preprocess
+        processed_inputs = self._apply(inputs, self._preprocess)
 
-        original_shape = inputs.shape[:2]
-        inputs = self._apply(inputs, self._configs['preprocess'])
-        processed_shape = (inputs.shape[:2]
-                           if inputs.shape[2] == 3 else inputs.shape[1:])
+        # inference on backend
+        outputs = self._model(processed_inputs)
 
-        outputs = self._model(inputs)
+        # postprocess
+        outputs = self._apply(outputs, self._postprocess)
 
-        outputs = self._apply(outputs, self._configs['postprocess'])
-        outputs[:, :4] = scale_coords(processed_shape, outputs[:, :4],
-                                      original_shape).round()
+        # scale up
+        outputs = self._scale(inputs.shape, processed_inputs.shape, outputs)
 
+        # convert to preds
         return self._to_preds(outputs)
+
+    def _scale(self, original_shape, process_shape, outputs):
+        if process_shape[2] != 3:
+            process_shape = process_shape[1:]
+
+        outputs[:, :4] = scale_coords(process_shape[:2], outputs[:, :4],
+                                      original_shape).round()
+        return outputs
 
     def _to_preds(self, outputs):
         preds = Predictions()
@@ -58,22 +64,17 @@ class Yolov5(ICore):
             value = func(value)
         return value
 
-    def _load_backend(self, backend, weight, device):
-        preprocess = [letterbox, bgr_to_rgb]
-        postprocess = []
+    def _load_model(self, backend_name, weight, device):
+        # load model
+        backend = import_module(f".yolov5_{backend_name}", self._BACKEND_PKG)
+        self._model = backend.Yolov5(weight, device)
 
-        if backend == 'torch':
-            from .backends.yolov5_torch import Yolov5
-            self._model = Yolov5(weight, device)
-
-            # add preprocess
-            preprocess.append(hwc_to_whc)
+        # add preprocess
+        if backend_name in ['torch', 'onnx', 'tensorrt']:
+            self._preprocess.append(hwc_to_whc)
 
         # contigousarray
-        preprocess.append(np.ascontiguousarray)
-
-        self._configs['preprocess'] = preprocess
-        self._configs['postprocess'] = postprocess
+        self._preprocess.append(np.ascontiguousarray)
 
     def __repr__(self):
         return str(self._model)
