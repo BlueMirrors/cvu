@@ -1,3 +1,4 @@
+from cvu.utils.google_utils import gdrive_download
 import os
 
 import numpy as np
@@ -5,7 +6,7 @@ import torch
 from torch import types
 
 from cvu.interface.model import IModel
-from cvu.utils.files import get_path
+from cvu.utils.general import load_json, get_path
 from cvu.postprocess.backend_torch.nms.yolov5 import non_max_suppression_torch
 
 
@@ -29,11 +30,22 @@ class Yolov5(IModel):
             if self._device.type != 'cpu':
                 weight += '.cuda'
             weight = get_path(__file__, "weights", f"{weight}.torchscript.pt")
+            self._download_weights(weight)
 
         self._model = torch.jit.load(weight, map_location=self._device)
 
         if self._device.type != 'cpu':
             self._model.half()
+
+    def _download_weights(self, weight):
+        if os.path.exists(weight): return
+
+        weight_key = os.path.split(weight)[-1]
+        weights_json = get_path(__file__, "weights", "torch_weights.json")
+        available_weights = load_json(weights_json)
+        if weight_key not in available_weights:
+            raise FileNotFoundError
+        gdrive_download(available_weights[weight_key], weight)
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         inputs = self._preprocess(inputs)
