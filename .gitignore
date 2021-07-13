@@ -140,3 +140,4 @@ cython_debug/
 # Ignore MAC files
 .DS_Store
 temp
+*.pt
