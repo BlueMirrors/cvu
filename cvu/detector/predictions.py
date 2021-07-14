@@ -38,8 +38,8 @@ class Prediction(IPrediction):
 
     def __repr__(self):
         return (f"id:{self.obj_id}; class:{self.class_name}; " +
-                "top-left:({self.bbox[0]}, {self.bbox[1]}); " +
-                "bottom-right:({self.bbox[2]}, {self.bbox[3]})")
+                f"top-left:({self.bbox[0]}, {self.bbox[1]}); " +
+                f"bottom-right:({self.bbox[2]}, {self.bbox[3]})")
 
     def draw(self, image):
         title = f"{self.obj_id}.{self.class_name}({self.confidence})"
