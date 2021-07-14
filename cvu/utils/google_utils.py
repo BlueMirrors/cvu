@@ -5,22 +5,27 @@ Contains code for interacting with Google Products
 (such as Google-Drive).
 """
 import os
+import zipfile
 import platform
 import time
 from pathlib import Path
 from typing import Optional
 
 
-def gdrive_download(id_: str, file_name: str) -> str:
+def gdrive_download(id_: str, file_name: str, unzip=False) -> str:
     """Downloads and extracts file from Google drive given the id of the file.
 
     Args:
         id_ (str): google drive file_ id
         file_name (Optional[str], optional): output file name.
+        unzip: unzip the downloaded file
 
     Returns:
         str: path where downloaded file_ was extracted 
     """
+    if unzip and os.path.splitext(file_name)[-1] != '.zip':
+        file_name += '.zip'
+
     # Downloads a file from Google Drive.
     start_time = time.time()
     file_ = Path(file_name)
@@ -59,6 +64,16 @@ def gdrive_download(id_: str, file_name: str) -> str:
         if file_.exists(): file_.unlink()
         print('Download error ')  # raise Exception('Download error')
         return result
+
+    if unzip:
+        print('Unzipping...', file_name)
+        # unzip
+        with zipfile.ZipFile(file_name, 'r') as zip_ref:
+            zip_ref.extractall(os.path.split(file_name)[0])
+
+        # delete zip
+        if os.path.isfile(file_name):
+            os.remove(file_name)
 
     print(f'Done ({time.time() - start_time:.1f}s)')
     return result
