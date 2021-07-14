@@ -27,6 +27,7 @@ class Yolov5(IModel):
             mixed_precision.set_global_policy('mixed_float16')
         else:
             self._device = 'cpu'
+            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     def _load_model(self, weight):
         if not os.path.exists(weight):
