@@ -28,7 +28,7 @@ def non_max_suppression_tf(prediction,
     assert 0 <= iou_thres <= 1, f'Invalid IoU {iou_thres}, valid values are between 0.0 and 1.0'
 
     # Settings
-    max_wh = 2, 4096  # (pixels) minimum and maximum box width and height
+    max_wh = 4096  # (pixels) minimum and maximum box width and height
     max_nms = 30000  # maximum number of boxes into torchvision.ops.nms()
     time_limit = 10.0  # seconds to quit after
     multi_label &= nc > 1  # multiple labels per box (adds 0.5ms/img)
@@ -51,7 +51,7 @@ def non_max_suppression_tf(prediction,
 
         # Detections matrix nx6 (xyxy, conf, cls)
         if multi_label:
-            i, j = (x[:, 5:] > conf_thres).nonzero()
+            i, j = (x[:, 5:] > conf_thres).nonzero().T
             x = np.concatenate(
                 (box[i], x[i, j + 5, None], j[:, None].astype('float')), 1)
 
@@ -86,7 +86,7 @@ def non_max_suppression_tf(prediction,
         if i.shape[0] > max_det:
             i = i[:max_det]
 
-        output[xi] = x[i]
+        output[xi] = x[i, :]
         if (time.time() - t) > time_limit:
             # time limit exceeded
             print(f'WARNING: NMS time limit {time_limit}s exceeded')
