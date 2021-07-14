@@ -141,3 +141,5 @@ cython_debug/
 .DS_Store
 temp
 *.pt
+**/weights/**
+!*.json
