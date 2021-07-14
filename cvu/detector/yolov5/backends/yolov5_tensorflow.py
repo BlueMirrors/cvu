@@ -22,19 +22,40 @@ class Yolov5(IModel):
     def _set_device(self, device):
         gpus = len(tf.config.list_physical_devices('GPU'))
 
-        if device == 'auto' and gpus > 0:
+        if (device == 'auto' or device == 'cuda') and gpus > 0:
             self._device = 'cuda:0'
             mixed_precision.set_global_policy('mixed_float16')
-        else:
-            self._device = 'cpu'
-            os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+            return
+
+        if device == 'tpu':
+            try:
+                tpu = tf.distribute.cluster_resolver.TPUClusterResolver()
+                tf.config.experimental_connect_to_cluster(tpu)
+                tf.tpu.experimental.initialize_tpu_system(tpu)
+
+                print(f"[CVU-Info] Backend: Tensorflow-{tf.__version__}-tpu")
+                self._device = 'tpu'
+                return
+
+            except:
+                print("[CVU-Error] Not connected to a TPU runtime",
+                      "reverting to CPU")
+
+        self._device = 'cpu'
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     def _load_model(self, weight):
         if not os.path.exists(weight):
             weight += '_tensorflow'
             weight = get_path(__file__, "weights", weight)
             self._download_weights(weight)
-        self._loaded = tf.saved_model.load(weight)
+
+        load_options = None
+        if self._device == 'tpu':
+            load_options = tf.saved_model.SaveOptions(
+                experimental_io_device="/job:localhost")
+
+        self._loaded = tf.saved_model.load(weight, options=load_options)
         self._model = self._loaded.signatures["serving_default"]
 
     def _download_weights(self, weight):
