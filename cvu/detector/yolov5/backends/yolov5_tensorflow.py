@@ -44,7 +44,7 @@ class Yolov5(IModel):
         available_weights = load_json(weights_json)
         if weight_key not in available_weights:
             raise FileNotFoundError
-        gdrive_download(available_weights[weight_key], weight)  #, unzip=True
+        gdrive_download(available_weights[weight_key], weight, unzip=True)
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         processed_inputs = self._preprocess(inputs)
