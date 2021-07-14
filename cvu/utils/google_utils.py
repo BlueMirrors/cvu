@@ -32,7 +32,7 @@ def gdrive_download(id_: str, file_name: str, unzip=False) -> str:
     cookie = Path('cookie')  # gdrive cookie
 
     print(f"Downloading https://drive.google.com/uc?",
-          "export=download&id={id_} as {file_}...",
+          f"export=download&id={id_} as {file_}...",
           end='',
           sep='')
 
