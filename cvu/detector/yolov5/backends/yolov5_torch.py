@@ -19,7 +19,7 @@ class Yolov5(IModel):
         self._load_model(weight)
 
     def _set_device(self, device):
-        if device == 'auto':
+        if device == 'auto' or device == 'cuda':
             self._device = torch.device(
                 'cuda:0' if torch.cuda.is_available() else 'cpu')
         else:
