@@ -7,7 +7,7 @@ from cvu.interface.core import ICore
 from cvu.detector.predictions import Predictions
 from cvu.detector.configs import COMMON_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
-from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_whc
+from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_chw
 from cvu.postprocess.bbox import scale_coords
 from cvu.utils.backend import setup_backend
 
@@ -77,7 +77,7 @@ class Yolov5(ICore):
 
         # add preprocess
         if backend_name in ['torch', 'onnx', 'tensorrt']:
-            self._preprocess.append(hwc_to_whc)
+            self._preprocess.append(hwc_to_chw)
 
         # contigousarray
         self._preprocess.append(np.ascontiguousarray)

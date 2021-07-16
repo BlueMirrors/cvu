@@ -20,7 +20,7 @@ def bgr_to_rgb(image: np.ndarray) -> np.ndarray:
     return image[..., ::-1]
 
 
-def hwc_to_whc(image: np.ndarray) -> np.ndarray:
+def hwc_to_chw(image: np.ndarray) -> np.ndarray:
     """Convert channels-last to channels-first
     channels-last = Height-Width-Channels
     channels-first = Channels-Height-Width
