@@ -1,6 +1,6 @@
 # <img src="static/logo.png" width="30"> CVU: Computer Vision Utils
 
-![status](https://img.shields.io/pypi/status/ansicolortags.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+![status](https://img.shields.io/pypi/status/ansicolortags.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![CodeFactor](https://www.codefactor.io/repository/github/bluemirrors/cvu/badge?s=700eb6a402321377322a7f4c15ebf99055e0c299)](https://www.codefactor.io/repository/github/bluemirrors/cvu)
 
 <br>
 CV tools for dummies.
