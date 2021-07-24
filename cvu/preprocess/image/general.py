@@ -1,3 +1,5 @@
+import cv2
+
 def bgr_to_rgb(image):
     return image[..., ::-1]
 
@@ -8,3 +10,7 @@ def hwc_to_whc(image):
 
 def normalize(image):
     return image / 255.0
+
+
+def resize(image, shape):
+    return cv2.resize(image, shape)

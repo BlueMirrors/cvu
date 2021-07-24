@@ -7,7 +7,7 @@ from cvu.interface.core import ICore
 from cvu.detector.predictions import Predictions
 from cvu.detector.configs import COMMON_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
-from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_whc
+from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_whc, normalize, resize
 from cvu.postprocess.bbox import scale_coords
 from cvu.utils.backend import setup_backend
 
@@ -76,7 +76,10 @@ class Yolov5(ICore):
         self._model = backend.Yolov5(weight, device)
 
         # add preprocess
-        if backend_name in ['torch', 'onnx', 'tensorrt']:
+        if backend_name=="tensorrt":
+            self._preprocess.extend(
+                [lambda image: resize(image, (640, 640)) , hwc_to_whc, normalize])
+        if backend_name in ['torch', 'onnx']:
             self._preprocess.append(hwc_to_whc)
 
         # contigousarray
