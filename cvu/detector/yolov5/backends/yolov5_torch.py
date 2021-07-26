@@ -1,12 +1,11 @@
-from cvu.utils.google_utils import gdrive_download
 import os
 
 import numpy as np
 import torch
-from torch import types
 
 from cvu.interface.model import IModel
-from cvu.utils.general import load_json, get_path
+from cvu.utils.google_utils import gdrive_download
+from cvu.utils.general import (load_json, get_path)
 from cvu.postprocess.backend_torch.nms.yolov5 import non_max_suppression_torch
 
 
@@ -19,7 +18,7 @@ class Yolov5(IModel):
         self._load_model(weight)
 
     def _set_device(self, device):
-        if device == 'auto' or device == 'cuda':
+        if device in ('auto', 'cuda'):
             self._device = torch.device(
                 'cuda:0' if torch.cuda.is_available() else 'cpu')
         else:
@@ -37,8 +36,10 @@ class Yolov5(IModel):
         if self._device.type != 'cpu':
             self._model.half()
 
-    def _download_weights(self, weight):
-        if os.path.exists(weight): return
+    @staticmethod
+    def _download_weights(weight):
+        if os.path.exists(weight):
+            return
 
         weight_key = os.path.split(weight)[-1]
         weights_json = get_path(__file__, "weights", "torch_weights.json")
@@ -74,7 +75,8 @@ class Yolov5(IModel):
 
         return inputs
 
-    def _postprocess(self, outputs):
+    @staticmethod
+    def _postprocess(outputs):
         # apply nms
         outputs = non_max_suppression_torch(outputs)
         return outputs
