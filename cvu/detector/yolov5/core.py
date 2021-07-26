@@ -57,7 +57,7 @@ class Yolov5(ICore):
 
     def _to_preds(self, outputs):
         preds = Predictions()
-        for *xyxy, conf, class_id in reversed(outputs):
+        for *xyxy, conf, class_id in outputs:
             if class_id in self._classes:
                 preds.create_and_append(xyxy,
                                         conf,
