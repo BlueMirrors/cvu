@@ -19,17 +19,19 @@ class Yolov5(IModel):
                  conf_thres: float = 0.4,
                  iou_thres: float = 0.5,
                  fp16: bool = True,
-                 input_shape=(384, 640)) -> None:
+                 input_shape=None) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
         self._logger = trt.Logger(trt.Logger.VERBOSE)
         self._stream = cuda.Stream()
+        self._weight = weight
 
         self._nc = num_classes
         self._conf_thres = conf_thres
         self._iou_thres = iou_thres
         self._fp16 = fp16
+        self._input_shape = input_shape
 
         self._engine = None
         self._context = None
@@ -37,8 +39,9 @@ class Yolov5(IModel):
         self._outputs = None
         self._bindings = None
 
-        self._load_model(weight, input_shape)
-        self._allocate_buffers()
+        if self._input_shape is not None:
+            self._load_model(weight)
+            self._allocate_buffers()
 
     def _deserialize_engine(self, trt_engine_path):
         with open(trt_engine_path, 'rb') as engine_file:
@@ -59,16 +62,23 @@ class Yolov5(IModel):
                 f"{weight_key.split('_')[0]} is not a supported model")
         gdrive_download(available_weights[weight_key], weight)
 
-    def _load_model(self, weight, input_shape):
+    def _load_model(self, weight):
         """Deserialized TensorRT cuda engine and creates execution context.
         """
         # load default models
         if "." not in weight:
-            engine_path = get_path(__file__, "weights", f"{weight}_trt.engine")
+            height, width = self._input_shape[:2]
+
+            engine_path = get_path(__file__, "weights",
+                                   f"{weight}_{height}_{width}_trt.engine")
+
+            onnx_weight = get_path(__file__, "weights", f"{weight}_trt.onnx")
+
             if not os.path.exists(engine_path):
-                onnx_weight = engine_path.replace("engine", "onnx")
+
                 self._download_weight(onnx_weight)
-                self._engine = self._build_engine(onnx_weight, input_shape)
+                self._engine = self._build_engine(onnx_weight, engine_path,
+                                                  self._input_shape)
             else:
                 self._engine = self._deserialize_engine(engine_path)
 
@@ -78,7 +88,7 @@ class Yolov5(IModel):
                 "onnx", "engine") if ".onnx" in weight else weight
 
             if not os.path.exists(engine_path):
-                self._engine = self._build_engine(weight, input_shape)
+                self._engine = self._build_engine(weight, self._input_shape)
             else:
                 self._engine = self._deserialize_engine(engine_path)
 
@@ -90,7 +100,7 @@ class Yolov5(IModel):
             raise Exception(
                 "Couldn't create execution context from engine successfully !")
 
-    def _build_engine(self, onnx_weight,
+    def _build_engine(self, onnx_weight, trt_engine_path,
                       input_shape) -> trt.tensorrt.ICudaEngine:
         """Builds TensorRT engine by parsing the onnx model.
         """
@@ -101,8 +111,6 @@ class Yolov5(IModel):
         elif ".onnx" not in onnx_weight:
             raise TypeError(
                 f"Expected onnx weight file, instead {onnx_weight} is given.")
-
-        trt_engine_path = onnx_weight.replace("onnx", "engine")
 
         # Specify that the network should be created with an explicit batch dimension.
         EXPLICIT_BATCH = 1 << (int)(
@@ -181,6 +189,20 @@ class Yolov5(IModel):
         :returns:
             list of detections, on (n,6) tensor per image [xyxy, conf, cls]
         """
+        if self._input_shape is None:
+            self._input_shape = inputs.shape[-2:]
+            print("[CVU-Info] Building and Optimizing TRT-Engine",
+                  f"for input_shape={self._input_shape}.",
+                  "This might take a few minutes for first time.")
+            self._load_model(self._weight)
+            self._allocate_buffers()
+
+        if inputs.shape[-2:] != self._input_shape:
+            raise Exception(
+                ("[CVU-Error] Invalid Input Shapes: Expected input to " +
+                 f"be of shape {self._input_shape}, but got " +
+                 f" input of shape {inputs.shape[-2:]}." +
+                 "Please rebuild TRT Engine with correct shapes."))
         resized = self._pre_process(inputs)
         outputs = self._inference(resized)
         preds = self._post_process(outputs)
