@@ -8,23 +8,20 @@ import cv2
 from cvu.interface.model import IModel
 from cvu.utils.google_utils import gdrive_download
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
-from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
+from cvu.utils.general import load_json, get_path
 
 
 class Yolov5(IModel):
-    def __init__(
-        self, 
-        weight : str = None,
-        device="cuda", 
-        num_classes : int = 80,
-        conf_thres: float = 0.4,
-        iou_thres: float = 0.5, 
-        fp16: bool = True) -> None:
+    def __init__(self,
+                 weight: str = None,
+                 device="cuda",
+                 num_classes: int = 80,
+                 conf_thres: float = 0.4,
+                 iou_thres: float = 0.5,
+                 fp16: bool = True) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
-        self._trt_engine_path = weight.replace("onnx", "engine")
-        self._onnx_model_path = weight
         self._nc = num_classes
         self._conf_thres = conf_thres
         self._iou_thres = iou_thres
@@ -37,78 +34,123 @@ class Yolov5(IModel):
         self._outputs = None
         self._bindings = None
         self._stream = cuda.Stream()
-        
-        self._load_model()
+
+        self._load_model(weight)
         self._allocate_buffers()
 
         # refer https://github.com/ultralytics/yolov5
         # post processing config
-        self._output_shapes = [
-            (1, 3, 80, 80, self._nc + 5),
-            (1, 3, 40, 40, self._nc + 5),
-            (1, 3, 20, 20, self._nc + 5)
-        ]
+        self._output_shapes = [(1, 3, 80, 80, self._nc + 5),
+                               (1, 3, 40, 40, self._nc + 5),
+                               (1, 3, 20, 20, self._nc + 5)]
         self._strides = np.array([8., 16., 32.])
         anchors = np.array([
-            [[10,13], [16,30], [33,23]],
-            [[30,61], [62,45], [59,119]],
-            [[116,90], [156,198], [373,326]],
+            [[10, 13], [16, 30], [33, 23]],
+            [[30, 61], [62, 45], [59, 119]],
+            [[116, 90], [156, 198], [373, 326]],
         ])
         self._nl = len(anchors)
-        
-        self._no = self._nc + 5 # outputs per anchor
+
+        self._no = self._nc + 5  # outputs per anchor
         self._na = len(anchors[0])
         a = anchors.copy().astype(np.float32)
         a = a.reshape(self._nl, -1, 2)
         self._anchors = a.copy()
         self._anchor_grid = a.copy().reshape(self._nl, 1, -1, 1, 1, 2)
 
-    def _load_model(self):
+    def _deserialize_engine(self, trt_engine_path):
+        with open(trt_engine_path, 'rb') as engine_file:
+            with trt.Runtime(self._logger) as runtime:
+                engine = runtime.deserialize_cuda_engine(engine_file.read())
+
+        return engine
+
+    def _download_weight(self, weight):
+        if os.path.exists(weight):
+            return
+
+        weight_key = os.path.split(weight)[-1]
+        weights_json = get_path(__file__, "weights", "tensorrt_weights.json")
+        available_weights = load_json(weights_json)
+        if weight_key not in available_weights:
+            raise NotImplementedError(
+                f"{weight_key.split('_')[0]} is not a supported model")
+        gdrive_download(available_weights[weight_key], weight)
+
+    def _load_model(self, weight):
         """Deserialized TensorRT cuda engine and creates execution context.
         """
-        if not os.path.exists(self._trt_engine_path):
-            self._engine = self._build_engine()
+        # load default models
+        if "." not in weight:
+            engine_path = get_path(__file__, "weights", f"{weight}_trt.engine")
+            if not os.path.exists(engine_path):
+                onnx_weight = engine_path.replace("engine", "onnx")
+                self._download_weight(onnx_weight)
+                self._engine = self._build_engine(onnx_weight)
+            else:
+                self._engine = self._deserialize_engine(engine_path)
+
+        # use custom models
         else:
-            # deserialize cuda engine
-            with open(self._trt_engine_path, 'rb') as f, trt.Runtime(self._logger) as runtime:
-                self._engine = runtime.deserialize_cuda_engine(f.read())
-        assert self._engine, "Couldn't build engine successfully !"
+            engine_path = weight.replace(
+                "onnx", "engine") if ".onnx" in weight else weight
+
+            if not os.path.exists(engine_path):
+                self._engine = self._build_engine(weight)
+            else:
+                self._engine = self._deserialize_engine(engine_path)
+
+        if not self._engine:
+            raise Exception("Couldn't build engine successfully !")
 
         self._context = self._engine.create_execution_context()
-        assert self._context, "Couldn't create execution context from engine successfully !"
-    
-    def _build_engine(self) -> trt.tensorrt.ICudaEngine:
+        if not self._context:
+            raise Exception(
+                "Couldn't create execution context from engine successfully !")
+
+    def _build_engine(self, onnx_weight) -> trt.tensorrt.ICudaEngine:
         """Builds TensorRT engine by parsing the onnx model.
         """
+
+        # checks to
+        if not os.path.exists(onnx_weight):
+            raise FileNotFoundError(f"{onnx_weight} does not exists.")
+        elif ".onnx" not in onnx_weight:
+            raise TypeError(
+                f"Expected onnx weight file, instead {onnx_weight} is given.")
+
+        trt_engine_path = onnx_weight.replace("onnx", "engine")
+
         # Specify that the network should be created with an explicit batch dimension.
-        EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+        EXPLICIT_BATCH = 1 << (int)(
+            trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
         with trt.Builder(self._logger) as builder, \
              builder.create_network(EXPLICIT_BATCH) as network, \
              trt.OnnxParser(network, self._logger) as parser:
-            
+
             # setup builder config
             config = builder.create_builder_config()
-            config.max_workspace_size = 64 * 1 << 20   # 64 MB
+            config.max_workspace_size = 64 * 1 << 20  # 64 MB
             builder.max_batch_size = 1
-            
+
             if self._fp16:
                 if builder.platform_has_fast_fp16:
                     print("Platform has FP16 support. Setting fp16 to True")
                     config.flags = 1 << (int)(trt.BuilderFlag.FP16)
-                
+
             # parse onnx model
-            with open(self._onnx_model_path, 'rb') as f:
+            with open(onnx_weight, 'rb') as f:
                 if not parser.parse(f.read()):
                     for error in range(parser.num_errors):
                         print(parser.get_error(error))
-            
+
             # build engine
             engine = builder.build_engine(network, config)
-            with open(self._trt_engine_path, 'wb') as f:
+            with open(trt_engine_path, 'wb') as f:
                 f.write(engine.serialize())
             print("Engine serialized and saved !")
-            return engine 
+            return engine
 
     def _allocate_buffers(self) -> None:
         """Allocates memory for inference using TensorRT engine.
@@ -121,10 +163,10 @@ class Yolov5(IModel):
             device_mem = cuda.mem_alloc(host_mem.nbytes)
             bindings.append(int(device_mem))
             if self._engine.binding_is_input(binding):
-                inputs.append({ 'host': host_mem, 'device': device_mem })
+                inputs.append({'host': host_mem, 'device': device_mem})
             else:
-                outputs.append({ 'host': host_mem, 'device': device_mem })
-        
+                outputs.append({'host': host_mem, 'device': device_mem})
+
         self._inputs = inputs
         self._outputs = outputs
         self._bindings = bindings
@@ -143,7 +185,7 @@ class Yolov5(IModel):
         # img = img.transpose((2, 0, 1)).astype(np.float32)
         # img /= 255.0
         return img
-    
+
     def __call__(self, inputs: np.ndarray) -> list:
         """Preprocess image, infer and postprocess raw
         tensorrt outputs.
@@ -159,7 +201,7 @@ class Yolov5(IModel):
         reshaped = []
         for output, shape in zip(outputs, self._output_shapes):
             reshaped.append(output.reshape(shape))
-        
+
         preds = self._post_process(reshaped)
         return preds[0]
 
@@ -173,20 +215,18 @@ class Yolov5(IModel):
             raw tensorrt output as a list
         """
         self._ctx.push()
-        
+
         # copy img to input memory
         # without astype gives invalid arg error
         self._inputs[0]['host'] = np.ravel(img).astype(np.float32)
-        
+
         # transfer data to the gpu
         for inp in self._inputs:
             cuda.memcpy_htod_async(inp['device'], inp['host'], self._stream)
-        
+
         # run inference
-        self._context.execute_async_v2(
-                bindings=self._bindings,
-                stream_handle=self._stream.handle
-        )
+        self._context.execute_async_v2(bindings=self._bindings,
+                                       stream_handle=self._stream.handle)
 
         # fetch outputs from gpu
         for out in self._outputs:
@@ -217,15 +257,18 @@ class Yolov5(IModel):
             grids.append(grid)
             scaled.append(out)
         z = []
-        for out, grid, stride, anchor in zip(scaled, grids, self._strides, self._anchor_grid):
+        for out, grid, stride, anchor in zip(scaled, grids, self._strides,
+                                             self._anchor_grid):
             _, _, width, height, _ = out.shape
             out[..., 0:2] = (out[..., 0:2] * 2. - 0.5 + grid) * stride
-            out[..., 2:4] = (out[..., 2:4] * 2) ** 2 * anchor
-            
+            out[..., 2:4] = (out[..., 2:4] * 2)**2 * anchor
+
             out = out.reshape((1, 3 * width * height, 85))
             z.append(out)
         pred = np.concatenate(z, 1)
-        return non_max_suppression_np(pred, conf_thres=self._conf_thres, iou_thres=self._iou_thres)
+        return non_max_suppression_np(pred,
+                                      conf_thres=self._conf_thres,
+                                      iou_thres=self._iou_thres)
 
     def _make_grid(self, nx: int, ny: int) -> np.ndarray:
         """
@@ -244,10 +287,10 @@ class Yolov5(IModel):
         grid = np.stack((yv, xv), axis=2)
         grid = grid.reshape(1, 1, ny, nx, 2)
         return grid
-    
+
     def _sigmoid_v(self, array: np.ndarray) -> np.ndarray:
         return np.reciprocal(np.exp(-array) + 1.0)
-    
+
     def __repr__(self) -> str:
         return f"Yolov5: tensorrt"
 
