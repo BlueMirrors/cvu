@@ -69,6 +69,7 @@ class Predictions(IPredictions):
     def draw(self, image) -> None:
         for object_ in self._objects:
             object_.draw(image)
+        return image
 
     def count(self) -> dict:
         if self._count is None:
