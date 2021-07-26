@@ -18,14 +18,17 @@ class Yolov5(IModel):
                  num_classes: int = 80,
                  conf_thres: float = 0.4,
                  iou_thres: float = 0.5,
-                 fp16: bool = True) -> None:
+                 fp16: bool = True,
+                 input_shape=(384, 640)) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
+        self._logger = trt.Logger(trt.Logger.VERBOSE)
+        self._stream = cuda.Stream()
+
         self._nc = num_classes
         self._conf_thres = conf_thres
         self._iou_thres = iou_thres
-        self._logger = trt.Logger(trt.Logger.VERBOSE)
         self._fp16 = fp16
 
         self._engine = None
@@ -33,30 +36,9 @@ class Yolov5(IModel):
         self._inputs = None
         self._outputs = None
         self._bindings = None
-        self._stream = cuda.Stream()
 
-        self._load_model(weight)
+        self._load_model(weight, input_shape)
         self._allocate_buffers()
-
-        # refer https://github.com/ultralytics/yolov5
-        # post processing config
-        self._output_shapes = [(1, 3, 80, 80, self._nc + 5),
-                               (1, 3, 40, 40, self._nc + 5),
-                               (1, 3, 20, 20, self._nc + 5)]
-        self._strides = np.array([8., 16., 32.])
-        anchors = np.array([
-            [[10, 13], [16, 30], [33, 23]],
-            [[30, 61], [62, 45], [59, 119]],
-            [[116, 90], [156, 198], [373, 326]],
-        ])
-        self._nl = len(anchors)
-
-        self._no = self._nc + 5  # outputs per anchor
-        self._na = len(anchors[0])
-        a = anchors.copy().astype(np.float32)
-        a = a.reshape(self._nl, -1, 2)
-        self._anchors = a.copy()
-        self._anchor_grid = a.copy().reshape(self._nl, 1, -1, 1, 1, 2)
 
     def _deserialize_engine(self, trt_engine_path):
         with open(trt_engine_path, 'rb') as engine_file:
@@ -77,7 +59,7 @@ class Yolov5(IModel):
                 f"{weight_key.split('_')[0]} is not a supported model")
         gdrive_download(available_weights[weight_key], weight)
 
-    def _load_model(self, weight):
+    def _load_model(self, weight, input_shape):
         """Deserialized TensorRT cuda engine and creates execution context.
         """
         # load default models
@@ -86,7 +68,7 @@ class Yolov5(IModel):
             if not os.path.exists(engine_path):
                 onnx_weight = engine_path.replace("engine", "onnx")
                 self._download_weight(onnx_weight)
-                self._engine = self._build_engine(onnx_weight)
+                self._engine = self._build_engine(onnx_weight, input_shape)
             else:
                 self._engine = self._deserialize_engine(engine_path)
 
@@ -96,7 +78,7 @@ class Yolov5(IModel):
                 "onnx", "engine") if ".onnx" in weight else weight
 
             if not os.path.exists(engine_path):
-                self._engine = self._build_engine(weight)
+                self._engine = self._build_engine(weight, input_shape)
             else:
                 self._engine = self._deserialize_engine(engine_path)
 
@@ -108,7 +90,8 @@ class Yolov5(IModel):
             raise Exception(
                 "Couldn't create execution context from engine successfully !")
 
-    def _build_engine(self, onnx_weight) -> trt.tensorrt.ICudaEngine:
+    def _build_engine(self, onnx_weight,
+                      input_shape) -> trt.tensorrt.ICudaEngine:
         """Builds TensorRT engine by parsing the onnx model.
         """
 
@@ -145,6 +128,12 @@ class Yolov5(IModel):
                     for error in range(parser.num_errors):
                         print(parser.get_error(error))
 
+            # set input shape
+            profile = builder.create_optimization_profile()
+            input_shape = (1, 3, *input_shape)
+            profile.set_shape('images', input_shape, input_shape, input_shape)
+            config.add_optimization_profile(profile)
+
             # build engine
             engine = builder.build_engine(network, config)
             with open(trt_engine_path, 'wb') as f:
@@ -179,11 +168,8 @@ class Yolov5(IModel):
         :returns:
             img: numpy.ndarray, preprocessed opencv image object
         """
-        # img = cv2.resize(img, (640, 640))
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        # img = img.transpose((2, 0, 1)).astype(np.float32)
-        # img /= 255.0
+        img = img.astype('float32')
+        img /= 255.0
         return img
 
     def __call__(self, inputs: np.ndarray) -> list:
@@ -196,16 +182,11 @@ class Yolov5(IModel):
             list of detections, on (n,6) tensor per image [xyxy, conf, cls]
         """
         resized = self._pre_process(inputs)
-        outputs = self._do_inference(resized)
-
-        reshaped = []
-        for output, shape in zip(outputs, self._output_shapes):
-            reshaped.append(output.reshape(shape))
-
-        preds = self._post_process(reshaped)
+        outputs = self._inference(resized)
+        preds = self._post_process(outputs)
         return preds[0]
 
-    def _do_inference(self, img: np.ndarray) -> list:
+    def _inference(self, img: np.ndarray) -> list:
         """
         Runs inference on the given image.
         :params:
@@ -248,48 +229,11 @@ class Yolov5(IModel):
             confs: class * obj prob tensor (dets, 1) 
             classes: class type tensor (dets, 1)
         """
-        scaled = []
-        grids = []
-        for out in outputs:
-            out = self._sigmoid_v(out)
-            _, _, width, height, _ = out.shape
-            grid = self._make_grid(width, height)
-            grids.append(grid)
-            scaled.append(out)
-        z = []
-        for out, grid, stride, anchor in zip(scaled, grids, self._strides,
-                                             self._anchor_grid):
-            _, _, width, height, _ = out.shape
-            out[..., 0:2] = (out[..., 0:2] * 2. - 0.5 + grid) * stride
-            out[..., 2:4] = (out[..., 2:4] * 2)**2 * anchor
-
-            out = out.reshape((1, 3 * width * height, 85))
-            z.append(out)
-        pred = np.concatenate(z, 1)
-        return non_max_suppression_np(pred,
+        # reshape into expected output shape
+        outputs = outputs[-1].reshape((1, -1, self._nc + 5))
+        return non_max_suppression_np(outputs,
                                       conf_thres=self._conf_thres,
                                       iou_thres=self._iou_thres)
-
-    def _make_grid(self, nx: int, ny: int) -> np.ndarray:
-        """
-        Create scaling tensor based on box location -> https://github.com/ultralytics/yolov5/blob/master/models/yolo.py
-        
-        :params:
-            nx: x-axis num boxes
-            ny: y-axis num boxes
-        
-        :returns:
-            grid: tensor of shape (1, 1, nx, ny, num_classes)
-        """
-        nx_vec = np.arange(nx)
-        ny_vec = np.arange(ny)
-        yv, xv = np.meshgrid(ny_vec, nx_vec)
-        grid = np.stack((yv, xv), axis=2)
-        grid = grid.reshape(1, 1, ny, nx, 2)
-        return grid
-
-    def _sigmoid_v(self, array: np.ndarray) -> np.ndarray:
-        return np.reciprocal(np.exp(-array) + 1.0)
 
     def __repr__(self) -> str:
         return f"Yolov5: tensorrt"
