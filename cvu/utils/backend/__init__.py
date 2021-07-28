@@ -37,7 +37,7 @@ SUPPORTED_BACKENDS = {
     'tensorrt': {
         'name': 'nvidia-tensorrt',
         'device': 'cuda',
-        'dependencies': None,
+        'dependencies': ['pycuda'],
         'version': None,
         'device-agnostic': True,
         'args': ["--index-url", "https://pypi.ngc.nvidia.com"]
