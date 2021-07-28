@@ -23,7 +23,7 @@ class Yolov5(IModel):
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
-        self._logger = trt.Logger(trt.Logger.VERBOSE)
+        self._logger = trt.Logger(trt.Logger.INFO)
         self._stream = cuda.Stream()
         self._weight = weight
 
