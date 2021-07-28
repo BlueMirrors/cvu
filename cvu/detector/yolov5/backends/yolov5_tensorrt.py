@@ -137,10 +137,7 @@ class Yolov5(IModel):
                         print(parser.get_error(error))
 
             # set input shape
-            profile = builder.create_optimization_profile()
-            input_shape = (1, 3, *input_shape)
-            profile.set_shape('images', input_shape, input_shape, input_shape)
-            config.add_optimization_profile(profile)
+            network.get_input(0).shape = (1, 3, *input_shape)
 
             # build engine
             engine = builder.build_engine(network, config)
