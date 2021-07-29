@@ -63,11 +63,11 @@ class Yolov5(IModel):
         if os.path.exists(weight): return
 
         weight_key = os.path.split(weight)[-1]
-        weights_json = get_path(__file__, "weights", "tensorflow_weights.json")
+        weights_json = get_path(__file__, "weights", "tflite_weights.json")
         available_weights = load_json(weights_json)
         if weight_key not in available_weights:
             raise FileNotFoundError
-        gdrive_download(available_weights[weight_key], weight, unzip=True)
+        gdrive_download(available_weights[weight_key], weight)
 
     def _set_input_shape(self, input_shape):
         self._model.resize_tensor_input(self._input_details[0]["index"], input_shape)
@@ -75,7 +75,7 @@ class Yolov5(IModel):
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         processed_inputs = self._preprocess(inputs)
-        processed_inputs = self._set_input_shape(processed_inputs.shape)
+        self._set_input_shape(processed_inputs.shape)
         self._model.set_tensor(self._input_details[0]["index"], processed_inputs)
         self._model.invoke()
         outputs = self._model.get_tensor(self._output_details[0]["index"])
