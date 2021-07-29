@@ -12,7 +12,6 @@ class IModel(metaclass=abc.ABCMeta):
     A Model combines the process for individual model inference
     for certain backend.
     """
-    @property
     @abc.abstractmethod
     def __call__(self, inputs: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Execute core on inputs
