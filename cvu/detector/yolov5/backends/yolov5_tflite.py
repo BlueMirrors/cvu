@@ -14,6 +14,7 @@ class Yolov5(IModel):
         self._model = None
         self._input_details = None
         self._output_details = None
+        self._input_shape = None
         self._device = None
 
         self._set_device(device)
@@ -72,10 +73,12 @@ class Yolov5(IModel):
     def _set_input_shape(self, input_shape):
         self._model.resize_tensor_input(self._input_details[0]["index"], input_shape)
         self._model.allocate_tensors()
+        self._input_shape = input_shape
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         processed_inputs = self._preprocess(inputs)
-        self._set_input_shape(processed_inputs.shape)
+        if self._input_shape != processed_inputs.shape:
+            self._set_input_shape(processed_inputs.shape)
         self._model.set_tensor(self._input_details[0]["index"], processed_inputs)
         self._model.invoke()
         outputs = self._model.get_tensor(self._output_details[0]["index"])
