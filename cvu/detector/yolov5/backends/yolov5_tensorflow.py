@@ -7,6 +7,7 @@ from tensorflow.keras import mixed_precision
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
+from cvu.postprocess.bbox import denormalize
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
@@ -60,17 +61,11 @@ class Yolov5(IModel):
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         outputs = self._model(input_1=inputs)['tf__detect'].numpy()
-        self._denormalize(outputs, inputs.shape[-3:])
+        denormalize(outputs, inputs.shape[-3:])
         return self._postprocess(outputs)[0]
 
     def __repr__(self) -> str:
         return f"Yolov5: {self._device}"
-
-    def _denormalize(self, outputs, shape):
-        outputs[..., 0] *= shape[1]  # x
-        outputs[..., 1] *= shape[0]  # y
-        outputs[..., 2] *= shape[1]  # w
-        outputs[..., 3] *= shape[0]  # h
 
     def _postprocess(self, outputs):
         # apply nms
