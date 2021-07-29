@@ -13,7 +13,7 @@ class IModel(metaclass=abc.ABCMeta):
     for certain backend.
     """
     @abc.abstractmethod
-    def __call__(self, inputs: np.ndarray, *args, **kwargs) -> np.ndarray:
+    def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Execute core on inputs
 
         Args:
