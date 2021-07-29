@@ -59,9 +59,8 @@ class Yolov5(IModel):
         self._model = self._loaded.signatures["serving_default"]
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
-        processed_inputs = self._preprocess(inputs)
-        outputs = self._model(input_1=processed_inputs)['tf__detect'].numpy()
-        self._denormalize(outputs, inputs.shape)
+        outputs = self._model(input_1=inputs)['tf__detect'].numpy()
+        self._denormalize(outputs, inputs.shape[-3:])
         return self._postprocess(outputs)[0]
 
     def __repr__(self) -> str:
@@ -72,16 +71,6 @@ class Yolov5(IModel):
         outputs[..., 1] *= shape[0]  # y
         outputs[..., 2] *= shape[1]  # w
         outputs[..., 3] *= shape[0]  # h
-
-    def _preprocess(self, inputs):
-        # normalize image
-        inputs = inputs.astype('float32')
-        inputs /= 255.
-
-        # add batch axis if not present
-        if inputs.ndim == 3:
-            inputs = np.expand_dims(inputs, axis=0)
-        return inputs
 
     def _postprocess(self, outputs):
         # apply nms

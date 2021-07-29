@@ -67,34 +67,15 @@ class Yolov5(IModel):
         self._input_shape = input_shape
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
-        processed_inputs = self._preprocess(inputs)
-        if self._input_shape != processed_inputs.shape:
-            self._set_input_shape(processed_inputs.shape)
-        self._model.set_tensor(self._input_details[0]["index"],
-                               processed_inputs)
+        if self._input_shape != inputs.shape:
+            self._set_input_shape(inputs.shape)
+        self._model.set_tensor(self._input_details[0]["index"], inputs)
         self._model.invoke()
         outputs = self._model.get_tensor(self._output_details[0]["index"])
-        # self._denormalize(outputs, inputs.shape)
         return self._postprocess(outputs)[0]
 
     def __repr__(self) -> str:
         return f"Yolov5: {self._device}"
-
-    def _denormalize(self, outputs, shape):
-        outputs[..., 0] *= shape[1]  # x
-        outputs[..., 1] *= shape[0]  # y
-        outputs[..., 2] *= shape[1]  # w
-        outputs[..., 3] *= shape[0]  # h
-
-    def _preprocess(self, inputs):
-        # normalize image
-        inputs = inputs.astype('float32')
-        inputs /= 255.
-
-        # add batch axis if not present
-        if inputs.ndim == 3:
-            inputs = np.expand_dims(inputs, axis=0)
-        return inputs
 
     def _postprocess(self, outputs):
         # apply nms

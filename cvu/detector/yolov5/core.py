@@ -17,7 +17,8 @@ from cvu.interface.core import ICore
 from cvu.detector.predictions import Predictions
 from cvu.detector.configs import COCO_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
-from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_chw
+from cvu.preprocess.image.general import (basic_preprocess, bgr_to_rgb,
+                                          hwc_to_chw)
 from cvu.postprocess.bbox import scale_coords
 from cvu.utils.backend import setup_backend
 
@@ -133,6 +134,9 @@ class Yolov5(ICore):
             np.ndarray: scaled outputs
         """
         # channels first, pick widht-height accordingly
+        if len(process_shape) > 3:
+            process_shape = process_shape[1:]
+
         if process_shape[2] != 3:
             process_shape = process_shape[1:]
 
@@ -156,6 +160,9 @@ class Yolov5(ICore):
         # add preprocess
         if backend_name in ['torch', 'onnx', 'tensorrt']:
             self._preprocess.append(hwc_to_chw)
+
+        if backend_name in ['onnx', 'tensorflow', 'tensorrt', 'tflite']:
+            self._preprocess.append(basic_preprocess)
 
         # contigousarray
         self._preprocess.append(np.ascontiguousarray)

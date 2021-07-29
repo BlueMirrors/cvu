@@ -153,18 +153,6 @@ class Yolov5(IModel):
         self._outputs = outputs
         self._bindings = bindings
 
-    def _pre_process(self, img: np.ndarray) -> np.ndarray:
-        """Preprocess the input image.
-        :params:
-            img: numpy.ndarray, opencv image object
-        
-        :returns:
-            img: numpy.ndarray, preprocessed opencv image object
-        """
-        img = img.astype('float32')
-        img /= 255.0
-        return img
-
     def __call__(self, inputs: np.ndarray) -> list:
         """Preprocess image, infer and postprocess raw
         tensorrt outputs.
@@ -188,8 +176,7 @@ class Yolov5(IModel):
                  f"be of shape {self._input_shape}, but got " +
                  f" input of shape {inputs.shape[-2:]}." +
                  "Please rebuild TRT Engine with correct shapes."))
-        resized = self._pre_process(inputs)
-        outputs = self._inference(resized)
+        outputs = self._inference(inputs)
         preds = self._post_process(outputs)
         return preds[0]
 

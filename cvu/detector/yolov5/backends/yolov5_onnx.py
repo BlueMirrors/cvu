@@ -24,24 +24,12 @@ class Yolov5(IModel):
         self._model = onnxruntime.InferenceSession(weight, None)
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
-        inputs = self._preprocess(inputs)
         outputs = self._model.run([self._model.get_outputs()[0].name],
                                   {self._model.get_inputs()[0].name: inputs})
         return self._postprocess(outputs)[0]
 
     def __repr__(self) -> str:
         return f"Yolov5s ONNX"
-
-    def _preprocess(self, inputs: np.ndarray) -> np.ndarray:
-        # normalize image
-        inputs = inputs.astype("float32")
-        inputs /= 255
-
-        # add batch if not present
-        if inputs.ndim == 3:
-            inputs = np.expand_dims(inputs, axis=0)
-
-        return inputs
 
     def _postprocess(self, outputs: np.ndarray) -> np.ndarray:
         # apply nms
