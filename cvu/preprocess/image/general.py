@@ -44,3 +44,27 @@ def normalize(image: np.ndarray) -> np.ndarray:
         np.ndarray: Normalized image with pixels in range 0-1
     """
     return image / 255.0
+
+
+def basic_preprocess(inputs: np.ndarray) -> np.ndarray:
+    """Apply basic preprocessing to inputs
+        - change dtype to FP32
+        - normalize
+        - add batch axis if not already present
+
+    Args:
+        inputs (np.ndarray): inputs array
+
+    Returns:
+        np.ndarray: processed inputs
+    """
+    # change type
+    inputs = inputs.astype('float32')
+
+    # normalize image
+    inputs /= 255.
+
+    # add batch axis if not present
+    if inputs.ndim == 3:
+        inputs = np.expand_dims(inputs, axis=0)
+    return inputs
