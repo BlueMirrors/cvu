@@ -8,6 +8,8 @@ Contains general Bound-Box postprocessing functions.
 
 from typing import Tuple, List
 
+import numpy as np
+
 
 def scale_coords(processed_shape: Tuple[int],
                  coords: List[int],
@@ -63,3 +65,16 @@ def clip_coords(boxes: List[int], img_shape: Tuple[int]) -> None:
     boxes[:, 1].clip(0, img_shape[0], out=boxes[:, 1])  # y1
     boxes[:, 2].clip(0, img_shape[1], out=boxes[:, 2])  # x2
     boxes[:, 3].clip(0, img_shape[0], out=boxes[:, 3])  # y2
+
+
+def denormalize(outputs: np.ndarray, shape: Tuple[int]) -> None:
+    """Denormalize outputs inplace
+
+    Args:
+        outputs (np.ndarray): inference's output
+        shape (Tuple[int]): base for denormalization
+    """
+    outputs[..., 0] *= shape[1]  # x
+    outputs[..., 1] *= shape[0]  # y
+    outputs[..., 2] *= shape[1]  # w
+    outputs[..., 3] *= shape[0]  # h
