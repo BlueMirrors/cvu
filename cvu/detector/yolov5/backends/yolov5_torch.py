@@ -35,7 +35,7 @@ class Yolov5(IModel):
             pretrained models. Defaults to "yolov5s".
 
             device (str, optional): name of the device to be used. Valid devices can be
-            "cpu", "gpu", "cuda", "tpu", "auto" or specific cuda devices such as
+            "cpu", "gpu", "cuda", "auto" or specific cuda devices such as
             "cuda:0" or "cuda:1" etc. Defaults to "auto" which tries to use the device
             best suited for selected backend and the hardware avaibility.
         """
