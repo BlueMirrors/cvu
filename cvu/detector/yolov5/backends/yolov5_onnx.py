@@ -56,7 +56,7 @@ class Yolov5(IModel):
         if not os.path.exists(weight):
 
             # get path to pretrained weights
-            weight += '_onnx'
+            weight += '.onnx'
             weight = get_path(__file__, "weights", weight)
 
             # download weights if not already downloaded
