@@ -76,7 +76,7 @@ class Yolov5(IModel):
         """
         # attempt to load predefined weights
         if not os.path.exists(weight):
-            weight += '_tflite'
+            weight += '.tflite'
 
             # get path to pretrained weights
             weight = get_path(__file__, "weights", weight)
