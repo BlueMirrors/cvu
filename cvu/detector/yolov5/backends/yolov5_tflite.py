@@ -74,7 +74,7 @@ class Yolov5(IModel):
                                processed_inputs)
         self._model.invoke()
         outputs = self._model.get_tensor(self._output_details[0]["index"])
-        self._denormalize(outputs, inputs.shape)
+        # self._denormalize(outputs, inputs.shape)
         return self._postprocess(outputs)[0]
 
     def __repr__(self) -> str:
