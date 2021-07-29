@@ -1,14 +1,14 @@
 import os
+
 import numpy as np
 import tensorrt as trt
 import pycuda.autoinit
 import pycuda.driver as cuda
-import cv2
 
 from cvu.interface.model import IModel
-from cvu.utils.google_utils import gdrive_download
+from cvu.utils.general import get_path
+from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
-from cvu.utils.general import load_json, get_path
 
 
 class Yolov5(IModel):
@@ -50,18 +50,6 @@ class Yolov5(IModel):
 
         return engine
 
-    def _download_weight(self, weight):
-        if os.path.exists(weight):
-            return
-
-        weight_key = os.path.split(weight)[-1]
-        weights_json = get_path(__file__, "weights", "tensorrt_weights.json")
-        available_weights = load_json(weights_json)
-        if weight_key not in available_weights:
-            raise NotImplementedError(
-                f"{weight_key.split('_')[0]} is not a supported model")
-        gdrive_download(available_weights[weight_key], weight)
-
     def _load_model(self, weight):
         """Deserialized TensorRT cuda engine and creates execution context.
         """
@@ -76,7 +64,7 @@ class Yolov5(IModel):
 
             if not os.path.exists(engine_path):
 
-                self._download_weight(onnx_weight)
+                download_weights(onnx_weight, "tensorrt")
                 self._engine = self._build_engine(onnx_weight, engine_path,
                                                   self._input_shape)
             else:

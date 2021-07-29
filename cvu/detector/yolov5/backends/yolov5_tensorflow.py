@@ -4,9 +4,9 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import mixed_precision
 
-from cvu.utils.google_utils import gdrive_download
 from cvu.interface.model import IModel
-from cvu.utils.general import load_json, get_path
+from cvu.utils.general import get_path
+from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
@@ -48,7 +48,7 @@ class Yolov5(IModel):
         if not os.path.exists(weight):
             weight += '_tensorflow'
             weight = get_path(__file__, "weights", weight)
-            self._download_weights(weight)
+            download_weights(weight, "tensorflow", unzip=True)
 
         load_options = None
         if self._device == 'tpu':
@@ -57,16 +57,6 @@ class Yolov5(IModel):
 
         self._loaded = tf.saved_model.load(weight, options=load_options)
         self._model = self._loaded.signatures["serving_default"]
-
-    def _download_weights(self, weight):
-        if os.path.exists(weight): return
-
-        weight_key = os.path.split(weight)[-1]
-        weights_json = get_path(__file__, "weights", "tensorflow_weights.json")
-        available_weights = load_json(weights_json)
-        if weight_key not in available_weights:
-            raise FileNotFoundError
-        gdrive_download(available_weights[weight_key], weight, unzip=True)
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         processed_inputs = self._preprocess(inputs)

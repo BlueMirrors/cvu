@@ -3,9 +3,9 @@ import os
 import numpy as np
 import tensorflow.lite as tflite
 
-from cvu.utils.google_utils import gdrive_download
 from cvu.interface.model import IModel
-from cvu.utils.general import load_json, get_path
+from cvu.utils.general import get_path
+from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
@@ -44,12 +44,12 @@ class Yolov5(IModel):
 
         self._device = 'cpu'
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-    
+
     def _load_model(self, weight):
         if not os.path.exists(weight):
             weight += '_tflite'
             weight = get_path(__file__, "weights", weight)
-            self._download_weights(weight)
+            download_weights(weight, "tflite")
 
         # load_options = None
         # if self._device == 'tpu':
@@ -59,19 +59,10 @@ class Yolov5(IModel):
         self._model = tflite.Interpreter(model_path=weight)
         self._input_details = self._model.get_input_details()
         self._output_details = self._model.get_output_details()
-    
-    def _download_weights(self, weight):
-        if os.path.exists(weight): return
-
-        weight_key = os.path.split(weight)[-1]
-        weights_json = get_path(__file__, "weights", "tflite_weights.json")
-        available_weights = load_json(weights_json)
-        if weight_key not in available_weights:
-            raise FileNotFoundError
-        gdrive_download(available_weights[weight_key], weight)
 
     def _set_input_shape(self, input_shape):
-        self._model.resize_tensor_input(self._input_details[0]["index"], input_shape)
+        self._model.resize_tensor_input(self._input_details[0]["index"],
+                                        input_shape)
         self._model.allocate_tensors()
         self._input_shape = input_shape
 
@@ -79,7 +70,8 @@ class Yolov5(IModel):
         processed_inputs = self._preprocess(inputs)
         if self._input_shape != processed_inputs.shape:
             self._set_input_shape(processed_inputs.shape)
-        self._model.set_tensor(self._input_details[0]["index"], processed_inputs)
+        self._model.set_tensor(self._input_details[0]["index"],
+                               processed_inputs)
         self._model.invoke()
         outputs = self._model.get_tensor(self._output_details[0]["index"])
         self._denormalize(outputs, inputs.shape)
