@@ -1,4 +1,14 @@
-from typing import Union, List
+"""This file contains Yolov5's ICore implementation.
+
+Yolov5 Core represents a common interface over which users can perform
+Yolov5 powered object detection, without having to worry about the details of
+different backends and their specific requirements and implementations. Core
+will internally resolve and handle all internal details.
+
+Find more about Yolov5 here from their official repository
+https://github.com/ultralytics/yolov5
+"""
+from typing import Callable, Tuple, Union, List
 from importlib import import_module
 
 import numpy as np
@@ -13,6 +23,11 @@ from cvu.utils.backend import setup_backend
 
 
 class Yolov5(ICore):
+    """Implements ICore for Yolov5
+
+    Yolov5 Core represents a common interface to perform
+    Yolov5 powered object detection.
+    """
     _BACKEND_PKG = "cvu.detector.yolov5.backends"
 
     def __init__(self,
@@ -20,7 +35,28 @@ class Yolov5(ICore):
                  backend: str = "torch",
                  weight: str = "yolov5s",
                  device: str = "auto") -> None:
+        """Initiate Yolov5 Object Detector
 
+        Args:
+            classes (Union[str, List[str]]): name of classes to be detected.
+            It can be set to individual classes like 'coco', 'person', 'cat' etc.
+            Alternatively, it also accepts list of classes such as ['person', 'cat'].
+            For default models/weights, 'classes' is used to filter out objects
+            according to provided argument from coco class. For custom models, all
+            classes should be provided in original order as list of strings.
+
+            backend (str, optional): name of the backend to be used for inference purposes.
+            Defaults to "torch".
+
+            weight (str, optional): path to weight files (according to selected backend).
+            Alternatively, it also accepts identifiers (such as yolvo5s, yolov5m, etc.)
+            to load pretrained models. Defaults to "yolov5s".
+
+            device (str, optional): name of the device to be used. Valid
+            devices can be "cpu", "gpu", "cuda", "tpu", "auto". Defaults to "auto" which tries
+            to use the device best suited for selected backend and the hardware avaibility.
+        """
+        # initiate class attributes
         self._preprocess = [letterbox, bgr_to_rgb]
         self._postprocess = []
         self._classes = {}
@@ -31,7 +67,24 @@ class Yolov5(ICore):
         self._load_model(backend, weight, device)
         self._load_classes(classes)
 
-    def __call__(self, inputs):
+    def __repr__(self) -> str:
+        """Returns Backend and Model Information
+
+        Returns:
+            str: information string
+        """
+        return str(self._model)
+
+    def __call__(self, inputs: np.ndarray, **kwargs) -> Predictions:
+        """Performs Yolov5 Object Detection on given inputs.
+        Returns detected objects as Predictions object.
+
+        Args:
+            inputs (np.ndarray): image in BGR format.
+
+        Returns:
+            Predictions: detected objects.
+        """
         # preprocess
         processed_inputs = self._apply(inputs, self._preprocess)
 
@@ -47,30 +100,55 @@ class Yolov5(ICore):
         # convert to preds
         return self._to_preds(outputs)
 
-    def _scale(self, original_shape, process_shape, outputs):
-        if process_shape[2] != 3:
-            process_shape = process_shape[1:]
+    @staticmethod
+    def _apply(
+            value: np.ndarray,
+            functions: List[Callable[[np.ndarray], np.ndarray]]) -> np.ndarray:
+        """Recursively applies list of callable functions to given value
 
-        outputs[:, :4] = scale_coords(process_shape[:2], outputs[:, :4],
-                                      original_shape).round()
-        return outputs
+        Args:
+            value (np.ndarray): input to be processed
 
-    def _to_preds(self, outputs):
-        preds = Predictions()
-        for *xyxy, conf, class_id in outputs:
-            if class_id in self._classes:
-                preds.create_and_append(xyxy,
-                                        conf,
-                                        class_id,
-                                        class_name=self._classes[class_id])
-        return preds
+            functions (List[Callable[[np.ndarray], np.ndarray]]): list of
+            callable functions.
 
-    def _apply(self, value, functions):
+        Returns:
+            np.ndarray: value resulting from applying all functions
+        """
         for func in functions:
             value = func(value)
         return value
 
-    def _load_model(self, backend_name, weight, device):
+    @staticmethod
+    def _scale(original_shape: Tuple[int], process_shape: Tuple[int],
+               outputs: np.ndarray) -> np.ndarray:
+        """Scale outputs based on process_shape to original_shape
+
+        Args:
+            original_shape (Tuple[int]): shape of original inputs.
+            process_shape (Tuple[int]): shape of processed inputs.
+            outputs (np.ndarray): outputs from yolov5 model
+
+        Returns:
+            np.ndarray: scaled outputs
+        """
+        # channels first, pick widht-height accordingly
+        if process_shape[2] != 3:
+            process_shape = process_shape[1:]
+
+        # scale bounding box
+        outputs[:, :4] = scale_coords(process_shape[:2], outputs[:, :4],
+                                      original_shape).round()
+        return outputs
+
+    def _load_model(self, backend_name: str, weight: str, device: str) -> None:
+        """Internally loads Model (backend)
+
+        Args:
+            backend_name (str): name of the backend
+            weight (str): path to weight file or default identifiers
+            device (str): name of target device (auto, cpu, gpu, cuda, tpu)
+        """
         # load model
         backend = import_module(f".yolov5_{backend_name}", self._BACKEND_PKG)
         self._model = backend.Yolov5(weight, device)
@@ -82,7 +160,12 @@ class Yolov5(ICore):
         # contigousarray
         self._preprocess.append(np.ascontiguousarray)
 
-    def _load_classes(self, classes):
+    def _load_classes(self, classes: Union[str, List[str]]) -> None:
+        """Internally loads target classes
+
+        Args:
+            classes (Union[str, List[str]]): name or list of classes to be detected.
+        """
         if classes == 'coco':
             classes = COCO_CLASSES
 
@@ -96,5 +179,24 @@ class Yolov5(ICore):
         else:
             self._classes = {i: name for i, name in enumerate(classes)}
 
-    def __repr__(self):
-        return str(self._model)
+    def _to_preds(self, outputs: np.ndarray) -> Predictions:
+        """Convert Yolov5's numpy inputs to Predictions object.
+
+        Args:
+            outputs (np.ndarray): basic outputs from yolov5 inference.
+
+        Returns:
+            Predictions: detected objects
+        """
+        # create container
+        preds = Predictions()
+
+        # add detection
+        for *xyxy, conf, class_id in outputs:
+            # filter class
+            if class_id in self._classes:
+                preds.create_and_append(xyxy,
+                                        conf,
+                                        class_id,
+                                        class_name=self._classes[class_id])
+        return preds
