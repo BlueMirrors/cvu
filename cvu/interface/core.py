@@ -15,7 +15,6 @@ class ICore(metaclass=abc.ABCMeta):
     A core defines one complete method/solution for certain use cases.
     For example, YoloV5 is a core of Object Detection use cases.
     """
-    @property
     @abc.abstractmethod
     def __init__(self, classes: Union[str, List[str]], backend: str, *args,
                  **kwargs) -> None:
@@ -27,9 +26,8 @@ class ICore(metaclass=abc.ABCMeta):
         """
         ...
 
-    @property
     @abc.abstractmethod
-    def __call__(self, inputs: np.ndarray, *args, **kwargs) -> IPredictions:
+    def __call__(self, inputs: np.ndarray, **kwargs) -> IPredictions:
         """Execute core on inputs
 
         Args:
