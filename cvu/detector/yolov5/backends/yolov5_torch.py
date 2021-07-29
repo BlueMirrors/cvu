@@ -109,7 +109,7 @@ class Yolov5(IModel):
         """
         return f"Yolov5: {self._device.type}"
 
-    def _preprocess(self, inputs: np.ndarray) -> np.ndarray:
+    def _preprocess(self, inputs: np.ndarray) -> torch.Tensor:
         """Process inputs for model inference.
             - Converts to torch tensor
             - FP16 conversion if GPU is getting used
@@ -120,7 +120,7 @@ class Yolov5(IModel):
             inputs (np.ndarray): numpy array in channels-first format
 
         Returns:
-            np.ndarray: processed inputs
+            torch.Tensor: processed inputs
         """
         # create torch tensor
         inputs = torch.from_numpy(inputs).to(self._device)
@@ -141,15 +141,15 @@ class Yolov5(IModel):
         return inputs
 
     @staticmethod
-    def _postprocess(outputs: np.ndarray) -> np.ndarray:
+    def _postprocess(outputs: torch.Tensor) -> torch.Tensor:
         """Post-process outputs from model inference.
             - Non-Max-Supression
 
         Args:
-            outputs (np.ndarray): model inference's output
+            outputs (torch.Tensor): model inference's output
 
         Returns:
-            np.ndarray: post-processed output
+            torch.Tensor: post-processed output
         """
         # apply nms
         outputs = non_max_suppression_torch(outputs)
