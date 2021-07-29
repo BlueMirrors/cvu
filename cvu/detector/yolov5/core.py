@@ -5,7 +5,7 @@ import numpy as np
 
 from cvu.interface.core import ICore
 from cvu.detector.predictions import Predictions
-from cvu.detector.configs import COMMON_CLASSES
+from cvu.detector.configs import COCO_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
 from cvu.preprocess.image.general import bgr_to_rgb, hwc_to_chw
 from cvu.postprocess.bbox import scale_coords
@@ -84,13 +84,13 @@ class Yolov5(ICore):
 
     def _load_classes(self, classes):
         if classes == 'coco':
-            classes = COMMON_CLASSES.COCO
+            classes = COCO_CLASSES
 
         elif isinstance(classes, str):
             classes = [classes]
 
-        if set(classes).issubset(COMMON_CLASSES.COCO):
-            for i, name in enumerate(COMMON_CLASSES.COCO):
+        if set(classes).issubset(COCO_CLASSES):
+            for i, name in enumerate(COCO_CLASSES):
                 if name in classes:
                     self._classes[i] = name
         else:
