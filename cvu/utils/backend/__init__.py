@@ -19,7 +19,7 @@ SUPPORTED_BACKENDS = {
         'args': None
     },
     'tflite': {
-        'name': 'tflite',
+        'name': 'tensorflow',
         'device': 'cpu',
         'dependencies': None,
         'version': None,
