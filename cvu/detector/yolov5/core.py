@@ -57,6 +57,9 @@ class Yolov5(ICore):
             devices can be "cpu", "gpu", "cuda", "tpu", "auto". Defaults to "auto" which tries
             to use the device best suited for selected backend and the hardware avaibility.
         """
+        # ICore
+        super().__init__(classes, backend)
+
         # initiate class attributes
         self._preprocess = [letterbox, bgr_to_rgb]
         self._postprocess = []
