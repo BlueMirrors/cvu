@@ -51,8 +51,6 @@ class Yolov5(IModel):
             weight (str): path to ONNX weight file or predefined-identifiers
             (such as yolvo5s, yolov5m, etc.)
         """
-        # TODO - Support for GPU
-
         # attempt to load predefined weights
         if not os.path.exists(weight):
 
@@ -64,7 +62,37 @@ class Yolov5(IModel):
             download_weights(weight, "onnx")
 
         # load model
-        self._model = onnxruntime.InferenceSession(weight, None)
+        if self._device == "cpu":
+            # load model on cpu
+            self._model = onnxruntime.InferenceSession(
+                weight, providers=["CPUExecutionProvider"])
+            return
+
+        # load-model using gpu runtime
+        try:
+            self._model = onnxruntime.InferenceSession(weight, None)
+
+        # failed to load model, try CPU runtime if applicable
+        except RuntimeError as error:
+
+            # check if multiple runtime providers are available
+            multiple_providers = len(onnxruntime.get_available_providers()) > 1
+
+            # try cpu device if multiple providers are available,
+            # and device selection is set to auto
+            if multiple_providers and self._device == "auto":
+
+                print("[CVU-Info] CUDA powered Backend failed to load,",
+                      "switching to CPU.")
+
+                print(f"[CVU-Info] Backend:Onnx-{onnxruntime.__version__}-cpu")
+
+                self._model = onnxruntime.InferenceSession(
+                    weight, providers=["CPUExecutionProvider"])
+                return
+
+            # switching providers failed or is not applicable
+            raise error
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Performs model inference on given inputs, and returns
