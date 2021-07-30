@@ -70,7 +70,8 @@ def non_max_suppression_torch(predictions: torch.Tensor,
         if not prediction.shape[0]:  # no boxes
             continue
 
-        elif prediction.shape[0] > max_nms:  # excess boxes
+        # excess boxes
+        if prediction.shape[0] > max_nms:
             # sort by confidence
             prediction = prediction[prediction[:, 4].argsort(
                 descending=True)[:max_nms]]

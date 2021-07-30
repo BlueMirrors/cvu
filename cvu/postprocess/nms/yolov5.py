@@ -3,8 +3,7 @@ Original Code Taken From ultralytics/yolov5
 URL: https://github.com/ultralytics/yolov5/blob/master/utils/general.py
 """
 import time
-from typing import List
-from collections.abc import Callable
+from typing import List, Callable
 
 import numpy as np
 
@@ -30,7 +29,11 @@ def non_max_suppression_np(predictions: np.ndarray,
         Defaults to 0.45.
 
         agnostic (bool, optional): agnostic to width-height. Defaults to False.
+
         multi_label (bool, optional): apply Multi-Label NMS. Defaults to False.
+
+        nms (Callable[[np.ndarray, np.ndarray, int, float], List[np.ndarray]]): Base NMS
+        function to be applied. Defaults to nms_np.
 
     Returns:
         List[np.ndarray]: list of detections, on (n,6) tensor per image [xyxy, conf, cls]
@@ -64,7 +67,9 @@ def non_max_suppression_np(predictions: np.ndarray,
         # Check shape; # number of boxes
         if not prediction.shape[0]:  # no boxes
             continue
-        elif prediction.shape[0] > max_nms:  # excess boxes
+
+        # excess boxes
+        if prediction.shape[0] > max_nms:
             prediction = prediction[np.argpartition(-prediction[:, 4],
                                                     max_nms)[:max_nms]]
 
