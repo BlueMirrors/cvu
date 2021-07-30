@@ -1,6 +1,7 @@
 """This file contains utility functions to install, setup and
 test various pip package and there dependencies.
 """
+import os
 import subprocess
 import sys
 import importlib
@@ -24,6 +25,7 @@ def install(package: str, *args) -> None:
 
 
 def setup(package: str,
+          device: str,
           dependencies: List[str] = None,
           version: str = None,
           args: List[str] = None) -> bool:
@@ -32,6 +34,7 @@ def setup(package: str,
 
     Args:
         package (str): name of the package to install and test
+        device (str): name of the device
         dependencies (List[str], optional): name of dependency packages. Defaults to None.
         version (str, optional): specific version. Defaults to None.
         args (List[str], optional): specific pip install arguments. Defaults to None.
@@ -41,7 +44,7 @@ def setup(package: str,
     """
     # check if already installed
     try:
-        attempt_import(package, dependencies)
+        attempt_import(package, device, dependencies)
         return True
 
     # attempt installation
@@ -64,7 +67,7 @@ def setup(package: str,
 
     # test if installation was successful
     try:
-        attempt_import(package, dependencies)
+        attempt_import(package, device, dependencies)
         return True
 
     # failed to install properly
@@ -75,13 +78,19 @@ def setup(package: str,
     return False
 
 
-def attempt_import(package: str, dependencies: List[str] = None) -> None:
+def attempt_import(package: str,
+                   device: str,
+                   dependencies: List[str] = None) -> None:
     """Imports the package and all given dependencies
 
     Args:
         package (str): package to import
+        device (str): name of the device
         dependencies (List[str], optional): name of dependency packages. Defaults to None.
     """
+    if device in ("cpu", "tpu"):
+        # disable GPUs explicitly
+        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # sanitize (for example tensorflow-gpu => tensorflow)
     package = package.split('-')[0]

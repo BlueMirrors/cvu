@@ -67,7 +67,7 @@ class Yolov5(ICore):
         self._model = None
 
         # setup backend and load model
-        setup_backend(backend, device if device != "auto" else None)
+        setup_backend(backend, device)
         self._load_model(backend, weight, device)
         self._load_classes(classes)
 
