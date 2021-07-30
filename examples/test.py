@@ -1,3 +1,5 @@
+"""Sample CVU usage.
+"""
 import time
 import os
 import argparse
@@ -10,7 +12,12 @@ from cvu.detector import Detector
 from cvu.utils.google_utils import gdrive_download
 
 
-def setup_static_files(no_video=False):
+def setup_static_files(no_video: bool = False) -> None:
+    """Setup needed directories, video and image files for test.
+
+    Args:
+        no_video (bool, optional): don't download video. Defaults to False.
+    """
     if not os.path.exists("temp"):
         os.mkdir('temp')
     if not os.path.exists("temp/zidane.jpg"):
@@ -20,7 +27,16 @@ def setup_static_files(no_video=False):
         gdrive_download("1rioaBCzP9S31DYVh-tHplQ3cgvgoBpNJ", "temp/people.mp4")
 
 
-def no_write_inference(backend, iterations=500, warmups=10):
+def no_write_inference(backend: str,
+                       iterations: int = 500,
+                       warmups: int = 10) -> None:
+    """Benchmark default model of backend without read/write
+
+    Args:
+        backend (str): name of backend
+        iterations (int, optional): number of iterations to benchmark for. Defaults to 500.
+        warmups (int, optional): number of iterations for warmup. Defaults to 10.
+    """
     # download files if needed
     setup_static_files(no_video=True)
 
@@ -34,7 +50,7 @@ def no_write_inference(backend, iterations=500, warmups=10):
 
     # benchmark
     start = time.time()
-    for i in range(iterations):
+    for _ in range(iterations):
         detector(frame)
     delta = time.time() - start
     print(f"FPS-NW({backend}): ", (iterations) / delta)
@@ -44,7 +60,18 @@ def no_write_inference(backend, iterations=500, warmups=10):
     cv2.imwrite(f'temp/zidane_out_{backend}.jpg', frame)
 
 
-def video_inference(backend, quick=False, iterations=500, warmups=5):
+def video_inference(backend: str,
+                    quick: bool = False,
+                    max_iterations: int = 500,
+                    warmups: int = 5) -> None:
+    """Benchmark default model of backend with read/write video
+
+    Args:
+        backend (str): name of backend
+        quick (bool, optional): skip video and only inference single image. Defaults to False.
+        max_iterations (int, optional): number of max-iterations to benchmark for. Defaults to 500.
+        warmups (int, optional): number of iterations for warmup. Defaults to 5.
+    """
     # download files if needed
     setup_static_files()
 
@@ -67,7 +94,7 @@ def video_inference(backend, quick=False, iterations=500, warmups=5):
         for frame in reader:
             detector(frame).draw(frame)
             writer.write(frame)
-            if reader.frame_count > iterations:
+            if reader.frame_count > max_iterations:
                 break
 
         delta = time.time() - start
@@ -84,26 +111,26 @@ def video_inference(backend, quick=False, iterations=500, warmups=5):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-backend',
+    PARSER = argparse.ArgumentParser()
+    PARSER.add_argument('-backend',
                         type=str,
                         default='onnx',
                         help="Name of the backend.")
-    parser.add_argument('-no-write', action='store_true')
-    parser.add_argument('-quick', action='store_true')
+    PARSER.add_argument('-no-write', action='store_true')
+    PARSER.add_argument('-quick', action='store_true')
 
-    parser.add_argument('-warmups',
+    PARSER.add_argument('-warmups',
                         type=int,
                         default=5,
                         help='number of warmup iters')
 
-    parser.add_argument('-iterations',
+    PARSER.add_argument('-iterations',
                         type=int,
                         default=500,
                         help='number of iterations')
 
-    opt = parser.parse_args()
-    if opt.no_write:
-        no_write_inference(opt.backend, opt.iterations, opt.warmups)
+    OPT = PARSER.parse_args()
+    if OPT.no_write:
+        no_write_inference(OPT.backend, OPT.iterations, OPT.warmups)
     else:
-        video_inference(opt.backend, opt.quick, opt.iterations, opt.warmups)
+        video_inference(OPT.backend, OPT.quick, OPT.iterations, OPT.warmups)
