@@ -1,8 +1,17 @@
+"""This file contains Yolov5's IModel implementation in TensorRT.
+This model (tensorRT-backend) performs inference using TensorRT,
+on a given input numpy array, and returns result after performing
+nms and other backend specific postprocessings.
+
+Model expects normalized inputs (data-format=channels-first) with
+batch axis. Model does not apply letterboxing to given inputs.
+"""
 import os
+from typing import Tuple, List
 
 import numpy as np
 import tensorrt as trt
-import pycuda.autoinit
+import pycuda.autoinit  # noqa # pylint: disable=unused-import
 import pycuda.driver as cuda
 
 from cvu.interface.model import IModel
@@ -12,100 +21,155 @@ from cvu.postprocess.nms.yolov5 import non_max_suppression_np
 
 
 class Yolov5(IModel):
+    """Implements IModel for Yolov5 using TensorRT.
+
+    This model (tensorrt-backend) performs inference, using TensorRT,
+    on a numpy array, and returns result after performing NMS.
+
+    This model does not support runtime dynamic inputs. In other words, once
+    created and first inference is done, model expects rest of the inputs to
+    be of the same shape as the first input (or the input shape given at the
+    initialization step).
+
+    Inputs are expected to be normalized in channels-first order
+    with/without batch axis.
+    """
     def __init__(self,
                  weight: str = None,
-                 device="cuda",
                  num_classes: int = 80,
-                 conf_thres: float = 0.4,
-                 iou_thres: float = 0.5,
-                 fp16: bool = True,
                  input_shape=None) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
         self._logger = trt.Logger(trt.Logger.INFO)
         self._stream = cuda.Stream()
-        self._weight = weight
 
+        # initiate basic class attributes
+        self._weight = weight
+        self._fp16 = True
+
+        # initiate model specific class attributes
         self._nc = num_classes
-        self._conf_thres = conf_thres
-        self._iou_thres = iou_thres
-        self._fp16 = fp16
         self._input_shape = input_shape
 
+        # initiate engine related class attributes
         self._engine = None
         self._context = None
         self._inputs = None
         self._outputs = None
         self._bindings = None
 
+        # initiate engine if input_shape given
         if self._input_shape is not None:
             self._load_model(weight)
             self._allocate_buffers()
 
-    def _deserialize_engine(self, trt_engine_path):
+    def _deserialize_engine(self,
+                            trt_engine_path: str) -> trt.tensorrt.ICudaEngine:
+        """Deserialize TensorRT Cuda Engine
+
+        Args:
+            trt_engine_path (str): path to engine file
+
+        Returns:
+            trt.tensorrt.ICudaEngine: deserialized engine
+        """
         with open(trt_engine_path, 'rb') as engine_file:
             with trt.Runtime(self._logger) as runtime:
                 engine = runtime.deserialize_cuda_engine(engine_file.read())
 
         return engine
 
-    def _load_model(self, weight):
-        """Deserialized TensorRT cuda engine and creates execution context.
+    def _load_model(self, weight: str) -> None:
+        """Internally loads TensorRT cuda engine and creates execution context.
+
+        Args:
+            weight (str): path to ONNX weight file, TensorRT Engine file or
+            predefined-identifiers (such as yolvo5s, yolov5m, etc.)
         """
-        # load default models
+        # load default models using predefined-identifiers
         if "." not in weight:
             height, width = self._input_shape[:2]
 
+            # get path to pretrained weights
             engine_path = get_path(__file__, "weights",
                                    f"{weight}_{height}_{width}_trt.engine")
 
             onnx_weight = get_path(__file__, "weights", f"{weight}_trt.onnx")
 
+            # download onnx weights if needed, and/or generate engine file
             if not os.path.exists(engine_path):
 
+                # download weights if not already downloaded
                 download_weights(onnx_weight, "tensorrt")
+
+                # build engine with current configs and load it
                 self._engine = self._build_engine(onnx_weight, engine_path,
                                                   self._input_shape)
             else:
+                # deserialize and load engine
                 self._engine = self._deserialize_engine(engine_path)
 
         # use custom models
         else:
+            # get path to weights
             engine_path = weight.replace(
                 "onnx", "engine") if ".onnx" in weight else weight
 
+            # build engine with given configs and load it
             if not os.path.exists(engine_path):
-                self._engine = self._build_engine(weight, self._input_shape)
+                self._engine = self._build_engine(weight, engine_path,
+                                                  self._input_shape)
             else:
+                # deserialize and load engine
                 self._engine = self._deserialize_engine(engine_path)
 
+        # check if engine loaded properly
         if not self._engine:
-            raise Exception("Couldn't build engine successfully !")
+            raise Exception("[CVU-Error] Couldn't build engine successfully !")
 
+        # create execution context
         self._context = self._engine.create_execution_context()
         if not self._context:
             raise Exception(
-                "Couldn't create execution context from engine successfully !")
+                "[CVU-Error] Couldn't create execution context from engine successfully !"
+            )
 
-    def _build_engine(self, onnx_weight, trt_engine_path,
-                      input_shape) -> trt.tensorrt.ICudaEngine:
-        """Builds TensorRT engine by parsing the onnx model.
+    def _build_engine(self, onnx_weight: str, trt_engine_path: str,
+                      input_shape: Tuple[int]) -> trt.tensorrt.ICudaEngine:
+        """Builds and serializes TensorRT engine by parsing the onnx model.
+
+        Args:
+            onnx_weight (str): path to onnx weight file
+            trt_engine_path (str): path where serialized engine file will be saved
+            input_shape (Tuple[int]): input shape for network
+
+        Raises:
+            FileNotFoundError: raised if onnx weight file doesn't exists
+            TypeError: raised if invalid type of weight file is given
+
+        Returns:
+            trt.tensorrt.ICudaEngine: built engine
         """
 
-        # checks to
+        # checks if onnx path exists
         if not os.path.exists(onnx_weight):
-            raise FileNotFoundError(f"{onnx_weight} does not exists.")
-        elif ".onnx" not in onnx_weight:
+            raise FileNotFoundError(
+                f"[CVU-Error] {onnx_weight} does not exists.")
+
+        # check if valid onnx_weight
+        if ".onnx" not in onnx_weight:
             raise TypeError(
-                f"Expected onnx weight file, instead {onnx_weight} is given.")
+                f"[CVU-Error] Expected onnx weight file, instead {onnx_weight} is given."
+            )
 
         # Specify that the network should be created with an explicit batch dimension.
-        EXPLICIT_BATCH = 1 << (int)(
+        batch_size = 1 << (int)(
             trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
+        # build and serialize engine
         with trt.Builder(self._logger) as builder, \
-             builder.create_network(EXPLICIT_BATCH) as network, \
+             builder.create_network(batch_size) as network, \
              trt.OnnxParser(network, self._logger) as parser:
 
             # setup builder config
@@ -113,14 +177,16 @@ class Yolov5(IModel):
             config.max_workspace_size = 64 * 1 << 20  # 64 MB
             builder.max_batch_size = 1
 
+            # FP16 quantization
             if self._fp16:
                 if builder.platform_has_fast_fp16:
-                    print("Platform has FP16 support. Setting fp16 to True")
+                    print("[CVU-Info] Platform has FP16 support.",
+                          "Setting fp16 to True")
                     config.flags = 1 << (int)(trt.BuilderFlag.FP16)
 
             # parse onnx model
-            with open(onnx_weight, 'rb') as f:
-                if not parser.parse(f.read()):
+            with open(onnx_weight, 'rb') as onnx_file:
+                if not parser.parse(onnx_file.read()):
                     for error in range(parser.num_errors):
                         print(parser.get_error(error))
 
@@ -129,9 +195,9 @@ class Yolov5(IModel):
 
             # build engine
             engine = builder.build_engine(network, config)
-            with open(trt_engine_path, 'wb') as f:
-                f.write(engine.serialize())
-            print("Engine serialized and saved !")
+            with open(trt_engine_path, 'wb') as trt_engine_file:
+                trt_engine_file.write(engine.serialize())
+            print("[CVU-Info] Engine serialized and saved !")
             return engine
 
     def _allocate_buffers(self) -> None:
@@ -149,19 +215,27 @@ class Yolov5(IModel):
             else:
                 outputs.append({'host': host_mem, 'device': device_mem})
 
+        # set buffers
         self._inputs = inputs
         self._outputs = outputs
         self._bindings = bindings
 
-    def __call__(self, inputs: np.ndarray) -> list:
-        """Preprocess image, infer and postprocess raw
-        tensorrt outputs.
-        :params:
-            img: numpy.ndarray, opencv image object
-        
-        :returns:
-            list of detections, on (n,6) tensor per image [xyxy, conf, cls]
+    def __call__(self, inputs: np.ndarray) -> np.ndarray:
+        """Performs model inference on given inputs, and returns
+        inference's output after NMS.
+
+        Args:
+            inputs (np.ndarray): normalized in channels-first format,
+            with/without batch axis.
+
+        Raises:
+            Exception: raised if inputs's shape doesn't not match with
+            expected input shape.
+
+        Returns:
+            np.ndarray: inference's output after NMS
         """
+        # set input shape and build engine if first inference
         if self._input_shape is None:
             self._input_shape = inputs.shape[-2:]
             print("[CVU-Info] Building and Optimizing TRT-Engine",
@@ -170,30 +244,34 @@ class Yolov5(IModel):
             self._load_model(self._weight)
             self._allocate_buffers()
 
+        # check if inputs shape match expected shape
         if inputs.shape[-2:] != self._input_shape:
             raise Exception(
                 ("[CVU-Error] Invalid Input Shapes: Expected input to " +
                  f"be of shape {self._input_shape}, but got " +
                  f" input of shape {inputs.shape[-2:]}." +
                  "Please rebuild TRT Engine with correct shapes."))
+
+        # perform inference and postprocess
         outputs = self._inference(inputs)
         preds = self._post_process(outputs)
         return preds[0]
 
-    def _inference(self, img: np.ndarray) -> list:
-        """
-        Runs inference on the given image.
-        :params:
-            img: numpy.ndarray, preprocessed opencv image object
-        
-        :returns:
-            raw tensorrt output as a list
+    def _inference(self, inputs: np.ndarray) -> List[np.ndarray]:
+        """Runs inference on the given inputs.
+
+        Args:
+            inputs (np.ndarray): channels-first format,
+            with/without batch axis
+
+        Returns:
+            List[np.ndarray]: inference's output (raw tensorrt output)
         """
         self._ctx.push()
 
-        # copy img to input memory
+        # copy inputs to input memory
         # without astype gives invalid arg error
-        self._inputs[0]['host'] = np.ravel(img).astype(np.float32)
+        self._inputs[0]['host'] = np.ravel(inputs).astype(np.float32)
 
         # transfer data to the gpu
         for inp in self._inputs:
@@ -212,28 +290,34 @@ class Yolov5(IModel):
         self._ctx.pop()
         return [out['host'] for out in self._outputs]
 
-    def _post_process(self, outputs: list) -> list:
-        """
-        Transforms tensorrt output into boxes, confs, labels and 
+    def _post_process(self, outputs: List[np.ndarray]) -> List[np.ndarray]:
+        """Post-process outputs from model inference.
+
+        Transforms tensorrt output into boxes, confs, labels and
         applies non max suppression.
-        :params:
-            output: raw tensorrt output tensor
+
+        Args:
+            outputs (List[np.ndarray]): raw tensorrt output tensor
+
         Returns:
-            boxes: x1,y1,x2,y2 tensor (dets, 4)
-            confs: class * obj prob tensor (dets, 1) 
-            classes: class type tensor (dets, 1)
+            List[np.ndarray]: post-processed output after nms
         """
         # reshape into expected output shape
         outputs = outputs[-1].reshape((1, -1, self._nc + 5))
-        return non_max_suppression_np(outputs,
-                                      conf_thres=self._conf_thres,
-                                      iou_thres=self._iou_thres)
+        return non_max_suppression_np(outputs)
 
     def __repr__(self) -> str:
-        return f"Yolov5: tensorrt"
+        """Returns Model Information
+
+        Returns:
+            str: information string
+        """
+        return f"Yolov5s TensorRT-Cuda-{self._input_shape}"
 
     def __del__(self):
+        """Clean up execution context stack.
+        """
         try:
             self._ctx.pop()
-        except Exception as e:
+        except pycuda.driver.LogicError as _:
             print("[CVU-Info] Context stack is already empty.")
