@@ -7,6 +7,7 @@ Model expects normalized inputs (data-format=channels-last) with batch
 axis. Model does not apply letterboxing to given inputs.
 """
 import os
+from typing import List
 
 import numpy as np
 import tensorflow as tf
@@ -131,7 +132,7 @@ class Yolov5(IModel):
         return f"Yolov5-Tensorflow: {self._device}"
 
     @staticmethod
-    def _postprocess(outputs: np.ndarray) -> np.ndarray:
+    def _postprocess(outputs: np.ndarray) -> List[np.ndarray]:
         """Post-process outputs from model inference.
             - Non-Max-Supression
 
@@ -139,7 +140,7 @@ class Yolov5(IModel):
             outputs (np.ndarray): model inference's output
 
         Returns:
-            np.ndarray: post-processed output
+            List[np.ndarray]: post-processed output
         """
         # apply nms
         outputs = non_max_suppression_tf(outputs)

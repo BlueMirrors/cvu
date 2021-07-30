@@ -7,6 +7,7 @@ Model expects unormalized inputs (data-format=channels-first) with/without
 batch axis. Model does not apply letterboxing to given inputs.
 """
 import os
+from typing import List
 
 import numpy as np
 import torch
@@ -141,7 +142,7 @@ class Yolov5(IModel):
         return inputs
 
     @staticmethod
-    def _postprocess(outputs: torch.Tensor) -> torch.Tensor:
+    def _postprocess(outputs: torch.Tensor) -> List[torch.Tensor]:
         """Post-process outputs from model inference.
             - Non-Max-Supression
 
@@ -149,7 +150,7 @@ class Yolov5(IModel):
             outputs (torch.Tensor): model inference's output
 
         Returns:
-            torch.Tensor: post-processed output
+            List[torch.Tensor]: post-processed output
         """
         # apply nms
         outputs = non_max_suppression_torch(outputs)
