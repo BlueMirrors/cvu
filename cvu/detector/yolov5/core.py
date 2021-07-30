@@ -188,7 +188,7 @@ class Yolov5(ICore):
                 if name in classes:
                     self._classes[i] = name
         else:
-            self._classes = {i: name for i, name in enumerate(classes)}
+            self._classes = dict(enumerate(classes))
 
     def _to_preds(self, outputs: np.ndarray) -> Predictions:
         """Convert Yolov5's numpy inputs to Predictions object.
