@@ -13,7 +13,7 @@ class Prediction(IPrediction):
 
     This class represents a single detected object, that encapsulates
     object's bounding box, confidence score, class id, class name and
-    object-id (unique if tracker is activate). This class provides a common
+    object-id (unique if tracker is activated). This class provides a common
     interface/structure over various detectors's (single-stage or double-stage)
     output. It also provides various common functionalities (used in general
     object detection pipeline) as public methods.

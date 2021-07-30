@@ -12,8 +12,9 @@ Example Usage
     # create detector object
     detector = Yolov5(classes='coco')
 
-    # load images BGR format
-    image = ...
+    # load images in BGR format (np.ndarray) using any tool
+    import cv2
+    image = cv2.imread('temp/zidane.jpg')
 
     # inference
     predictions = detector(image)

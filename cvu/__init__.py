@@ -1,7 +1,7 @@
 """CVU: Computer Vision Utils
 Easy to use and consistent interface across various Computer Vision
 Use cases such as Object Detection, Segmentation, Tracking etc, on various
-backends like TensorRT, TFLite, TF, Torch etc. This tool aims at making
+backends like TensorRT, TFLite, TensorFlow, PyTorch, ONNX etc. This tool aims at making
 computer vision accessible to everyone with or without in-depth Computer
 Vision Knowledge. CVU already contains multiple state of the art generalized
 models for you to use right out of the box, but it also supports custom weights
