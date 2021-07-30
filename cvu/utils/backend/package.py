@@ -12,9 +12,9 @@ def install(package, *args):
         print(f"[CVU-Error] {package.title()} Auto-Installation Failed...")
 
 
-def setup(package, device, dependencies=None, version=None, args=None):
+def setup(package, dependencies=None, version=None, args=None):
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(package, dependencies)
         return True
 
     except ModuleNotFoundError:
@@ -31,7 +31,7 @@ def setup(package, device, dependencies=None, version=None, args=None):
             install(package)
 
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(package, dependencies)
         return True
 
     except ModuleNotFoundError:
@@ -45,7 +45,7 @@ def setup(package, device, dependencies=None, version=None, args=None):
     return False
 
 
-def attempt_import(package, device, dependencies=None):
+def attempt_import(package, dependencies=None):
     package = package.split('-')[0]
     if dependencies is not None:
         for dependency in dependencies:

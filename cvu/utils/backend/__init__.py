@@ -85,7 +85,6 @@ def setup_backend(backend_name: str, device: str = None) -> bool:
 
     # attempt to install best option (possibly only option for some backends)
     success = setup(package=package,
-                    device=device,
                     dependencies=backend['dependencies'],
                     version=backend["version"],
                     args=backend["args"])
@@ -95,7 +94,6 @@ def setup_backend(backend_name: str, device: str = None) -> bool:
     if not success and auto_selected_device and not backend['device-agnostic']:
         package = package.split('-')[0]
         success = setup(package=package,
-                        device='cpu',
                         dependencies=backend['dependencies'],
                         version=backend["version"],
                         args=backend["args"])
