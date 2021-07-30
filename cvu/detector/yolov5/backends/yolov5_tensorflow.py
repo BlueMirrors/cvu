@@ -6,6 +6,7 @@ nms and other backend specific postprocessings.
 Model expects normalized inputs (data-format=channels-last) with batch
 axis. Model does not apply letterboxing to given inputs.
 """
+import logging
 import os
 from typing import List
 
@@ -44,6 +45,10 @@ class Yolov5(IModel):
         self._model = None
         self._device = None
         self._loaded = None
+
+        # disable logging
+        logging.disable(logging.WARNING)
+        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
         # setup device
         self._set_device(device)
