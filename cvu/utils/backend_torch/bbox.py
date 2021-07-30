@@ -2,29 +2,38 @@
 URL: https://github.com/ultralytics/yolov5/blob/master/utils/general.py
 """
 import torch
-import numpy as np
 
 
-def xywh2xyxy(x):
-    # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
-    y = x.clone()
-    y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x
-    y[:, 1] = x[:, 1] - x[:, 3] / 2  # top left y
-    y[:, 2] = x[:, 0] + x[:, 2] / 2  # bottom right x
-    y[:, 3] = x[:, 1] + x[:, 3] / 2  # bottom right y
-    return y
+def xywh2xyxy(xywh: torch.Tensor) -> torch.Tensor:
+    """Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2]
+
+    Args:
+        xywh (torch.Tensor): tensor of 4 float [center_x, center_y, width, height]
+
+    Returns:
+        torch.Tensor: tensor of 4 float [x1, y1, x2, y2] where (x1,y1)==top-left
+        and (x2,y2)==bottom-right.
+    """
+    xyxy = xywh.clone()
+    xyxy[:, 0] = xywh[:, 0] - xywh[:, 2] / 2  # top left x
+    xyxy[:, 1] = xywh[:, 1] - xywh[:, 3] / 2  # top left y
+    xyxy[:, 2] = xywh[:, 0] + xywh[:, 2] / 2  # bottom right x
+    xyxy[:, 3] = xywh[:, 1] + xywh[:, 3] / 2  # bottom right y
+    return xyxy
 
 
-def box_iou(box1, box2):
+def box_iou(box1: torch.Tensor, box2: torch.Tensor) -> torch.Tensor:
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
     """
     Return intersection-over-union (Jaccard index) of boxes.
     Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
-    Arguments:
-        box1 (Tensor[N, 4])
-        box2 (Tensor[M, 4])
+
+    Args:
+        box1 (torch.Tensor[N, 4]): first box
+        box2 (torch.Tensor[M, 4]): second box
+
     Returns:
-        iou (Tensor[N, M]): the NxM matrix containing the pairwise
+        iou (torch.Tensor[N, M]): the NxM matrix containing the pairwise
             IoU values for every element in boxes1 and boxes2
     """
     def box_area(box):
