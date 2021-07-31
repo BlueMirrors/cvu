@@ -1,48 +1,59 @@
 """Original Code Taken From https://stackoverflow.com/a/39225272
 
-Contains code for interacting with Google Products
+This file contains various functions for interacting with Google Products
 (such as Google-Drive).
 """
 import os
+from typing import Optional
+
 import requests
 
 from cvu.utils.general import unzip_file
 
 
-def gdrive_download(id_: str, filepath: str, unzip: bool = False):
+def gdrive_download(id_: str, filepath: str, unzip: bool = False) -> None:
     """Downloads and extracts file (if needed) from Google drive given the id of the file.
 
     Args:
         id_ (str): google drive file_ id
         file_name (Optional[str], optional): output file name.
         unzip: unzip the downloaded file
-
-    Returns:
-        str: path where downloaded file_ was extracted 
     """
-    URL = "https://docs.google.com/uc?export=download"
+    # gdrive URL
+    url = "https://docs.google.com/uc?export=download"
 
+    # add extension if needed
     if unzip and os.path.splitext(filepath)[-1] != '.zip':
         filepath += '.zip'
 
-    print(f'[CVU-Info] Downloading {filepath} from {URL}&id={id_}')
+    print(f'[CVU-Info] Downloading {filepath} from {url}&id={id_}')
 
     session = requests.Session()
 
-    response = session.get(URL, params={'id': id_}, stream=True)
+    response = session.get(url, params={'id': id_}, stream=True)
     token = get_confirm_token(response)
 
     if token:
         params = {'id': id_, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
+        response = session.get(url, params=params, stream=True)
 
+    # save file
     save_response_content(response, filepath)
 
+    # unzip if needed
     if unzip:
         unzip_file(filepath)
 
 
-def get_confirm_token(response):
+def get_confirm_token(response: requests.models.Response) -> Optional[str]:
+    """Get confirmation token from request's response
+
+    Args:
+        response (requests.models.Response): request's response
+
+    Returns:
+        Optional[str]: confirmation token if any available
+    """
     for key, value in response.cookies.items():
         if key.startswith('download_warning'):
             return value
@@ -50,10 +61,18 @@ def get_confirm_token(response):
     return None
 
 
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
+def save_response_content(response: requests.models.Response,
+                          destination: str) -> None:
+    """Save response content at destination path
 
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
+    Args:
+        response (requests.models.Response): request's response
+        destination (str): path where response content will be saved
+    """
+    # default
+    chunk_size = 32768
+
+    with open(destination, "wb") as response_file:
+        for chunk in response.iter_content(chunk_size):
             if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+                response_file.write(chunk)
