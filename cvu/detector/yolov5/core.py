@@ -159,7 +159,7 @@ class Yolov5(ICore):
         # load model
         backend = import_module(f".yolov5_{backend_name}", self._BACKEND_PKG)
 
-        if backend != 'tensorrt':
+        if backend_name != 'tensorrt':
             self._model = backend.Yolov5(weight, device)
         else:
             self._model = backend.Yolov5(weight)
