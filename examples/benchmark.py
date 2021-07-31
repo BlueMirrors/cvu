@@ -165,6 +165,11 @@ if __name__ == "__main__":
                         default=False,
                         help='do not write output')
     OPT = PARSER.parse_args()
+
+    # set default warmup and iterations if device=gpu
+    if OPT.device == 'gpu':
+        OPT.warmups = 50
+        OPT.iterations = 500
     if not OPT.backend:
         OPT.backend = BACKEND_FROM_DEVICE[OPT.device]
     if OPT.img:
@@ -174,5 +179,11 @@ if __name__ == "__main__":
         test_video(OPT.backend, OPT.video, OPT.max_frames, OPT.warmups,
                    OPT.device, OPT.no_write)
     else:
-        print(COLOR_MAP['ERROR'] + "Please provide either -img or -video" +
+        print(COLOR_MAP['OK'] +
+              "As no -img or -video argument was passed, the tool will \
+                download default image and video and run benchmark on it." +
               COLOR_MAP['RESET'])
+        test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
+                   OPT.device)
+        test_video(OPT.backend, "person.mp4", OPT.max_frames, OPT.warmups,
+                   OPT.device, OPT.no_write)
