@@ -164,7 +164,6 @@ if __name__ == "__main__":
                         action='store_true',
                         default=False,
                         help='do not write output')
-                        
     OPT = PARSER.parse_args()
     if not OPT.backend:
         OPT.backend = BACKEND_FROM_DEVICE[OPT.device]
