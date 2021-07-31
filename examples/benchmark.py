@@ -15,7 +15,6 @@ from cvu.utils.backend.package import setup
 from cvu.utils.google_utils import gdrive_download
 
 #TODO - Combine benchmarks at the end
-#TODO - function to print color strings
 
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
@@ -31,6 +30,8 @@ COLOR_MAP = {
     'YELLOW': '\033[93m',
     'HEADER': '\033[95m'
 }
+
+BACKEND_BENCHMARKS = {}
 
 
 def install_dependencies() -> None:
@@ -85,14 +86,18 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         for _ in range(iterations):
             detector(frame)
         delta = time.time() - start
-        print(COLOR_MAP['OK'] + f"FPS({backend}): {(iterations) / delta}" +
-              COLOR_MAP['RESET'])
+        BACKEND_BENCHMARKS[backend] = f"FPS({backend}): {iterations / delta}"
 
         # write output
         detector(frame).draw(frame)
         cv2.imwrite(f'{img.split(".")[0]}_{backend}.jpg', frame)
         print(COLOR_MAP['CYAN'] +
               f'Image saved at: {img.split(".")[0]}_{backend}.jpg' +
+              COLOR_MAP['RESET'])
+
+    for benchmarks in BACKEND_BENCHMARKS:
+        print(COLOR_MAP['OK'] +
+              f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
               COLOR_MAP['RESET'])
 
 
@@ -140,15 +145,19 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
                 break
 
         delta = time.time() - start
-        print(COLOR_MAP['OK'] +
-              f"FPS({backend}): {(reader.frame_count - warmups) / delta}" +
-              COLOR_MAP['RESET'])
+        BACKEND_BENCHMARKS[
+            backend] = f"FPS({backend}): {(reader.frame_count - warmups) / delta}"
         if not no_write:
             print(COLOR_MAP['CYAN'] +
                   f'Video saved at: {video.split(".")[0]}_{backend}.mp4' +
                   COLOR_MAP['RESET'])
             writer.release()
         reader.release()
+
+    for benchmarks in BACKEND_BENCHMARKS:
+        print(COLOR_MAP['OK'] +
+              f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
+              COLOR_MAP['RESET'])
 
 
 if __name__ == "__main__":
