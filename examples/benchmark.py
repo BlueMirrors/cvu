@@ -14,8 +14,6 @@ from cvu.detector import Detector
 from cvu.utils.backend.package import setup
 from cvu.utils.google_utils import gdrive_download
 
-#TODO - Combine benchmarks at the end
-
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
     'gpu': ['tensorflow', 'onnx', 'torch', 'tensorrt'],
@@ -201,8 +199,10 @@ if __name__ == "__main__":
         #TODO - check iterations > warmups and tell user if otherwise
         OPT.warmups = 50
         OPT.iterations = 500
+    # set default backend if backend not specified
     if not OPT.backend:
         OPT.backend = BACKEND_FROM_DEVICE[OPT.device]
+    # run inference based on image or video
     if OPT.img:
         test_image(OPT.backend, OPT.img, OPT.iterations, OPT.warmups,
                    OPT.device)
@@ -210,9 +210,10 @@ if __name__ == "__main__":
         test_video(OPT.backend, OPT.video, OPT.max_frames, OPT.warmups,
                    OPT.device, OPT.no_write)
     else:
+        # run inference on default image and videos
         print(COLOR_MAP['OK'] +
-              "As no -img or -video argument was passed, the tool will \
-                download default image and video and run benchmark on it." +
+              "As no -img or -video argument was passed, the tool will" +
+              "download default image and video and run benchmark on it." +
               COLOR_MAP['RESET'])
         test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
                    OPT.device)
