@@ -24,7 +24,7 @@ def install_dependencies() -> None:
     """Install dependencies for benchmarking.
     """
     setup("vidsz", "cpu")
-    vidsz = importlib.import_module("vidsz")
+    vidsz = importlib.import_module("vidsz.opencv")
     return vidsz
 
 
@@ -78,6 +78,7 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         # write output
         detector(frame).draw(frame)
         cv2.imwrite(f'{img.split(".")[0]}_{backend}.jpg', frame)
+        print(COLOR_MAP['ERROR'] + f'Image saved at: {img.split(".")[0]}_{backend}.jpg' + COLOR_MAP['RESET')
 
 
 def test_video(backends: list, video: str, max_frames: int, warmups: int,
@@ -102,9 +103,9 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
 
     for backend in backends:
         detector = Detector(classes='coco', backend=backend, device=device)
-        reader = vidsz.opencv.Reader(video)
+        reader = vidsz.Reader(video)
         if not no_write:
-            writer = vidsz.opencv.Writer(reader)
+            writer = vidsz.Writer(reader, name=f"{video.split('.')[0]}_{backend}.mp4")
         # Warm up
         for frame in reader:
             detector(frame).draw(frame)
@@ -126,6 +127,7 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
         print(COLOR_MAP['OK'] + f"FPS({backend}): " + COLOR_MAP['RESET'],
               (reader.frame_count - warmups) / delta)
         if not no_write:
+            print(COLOR_MAP['ERROR'] + f'Video saved at: {video.split(".")[0]}_{backend}.mp4' + COLOR_MAP['RESET'])
             writer.release()
         reader.release()
 
