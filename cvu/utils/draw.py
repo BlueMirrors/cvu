@@ -1,25 +1,18 @@
 """This file contains various drawing utility functions.
 """
-from typing import (Optional, Tuple, List)
+from typing import Optional, Tuple
 
 import numpy as np
 import cv2
 
-
-def random_color() -> List[float]:
-    """Return a random RGB/BGR Color
-
-    Returns:
-        List[float]: list of 3 float representing Color
-    """
-    return list(np.random.random(size=3) * 256)  # pylint: disable=maybe-no-member
+from cvu.utils.colors import random_color
 
 
 def draw_bbox(image: np.ndarray,
               bbox: np.ndarray,
               title: Optional[str] = None,
               color: Optional[Tuple[int]] = None,
-              thickness: Optional[int] = 2) -> None:
+              thickness: Optional[int] = 3) -> None:
     """Draw Bounding Box on the given image (inplace)
 
     Args:
@@ -38,9 +31,14 @@ def draw_bbox(image: np.ndarray,
 
     # add title
     if title:
+        scale = min(image.shape[0], image.shape[1]) / (720 / 0.9)
+        text_size = cv2.getTextSize(title, 0, fontScale=scale, thickness=1)[0]
+        top_left = (x1 - thickness + 1, y1 - text_size[1] - 20)
+        bottom_right = (x1 + text_size[0] + 5, y1)
+
+        cv2.rectangle(image, top_left, bottom_right, color=color, thickness=-1)
         cv2.putText(image, title, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
-                    min(image.shape[0], image.shape[1]) / (1280 / 0.9), color,
-                    2)
+                    scale, (255, 255, 255), 2)
 
     # add box
     cv2.rectangle(image, (x1, y1), (x2, y2), color=color, thickness=thickness)
