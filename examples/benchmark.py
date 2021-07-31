@@ -217,5 +217,5 @@ if __name__ == "__main__":
               COLOR_MAP['RESET'])
         test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
                    OPT.device)
-        test_video(OPT.backend, "person.mp4", OPT.max_frames, OPT.warmups,
+        test_video(OPT.backend, "people.mp4", OPT.max_frames, OPT.warmups,
                    OPT.device, OPT.no_write)
