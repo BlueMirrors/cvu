@@ -13,8 +13,8 @@ from cvu.utils.google_utils import gdrive_download
 
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
-    'gpu': ['onnx', 'torch', 'tflite', 'tensorflow', 'tensorrt'],
-    'tpu': ['tflite']
+    'gpu': ['tensorflow', 'onnx', 'torch', 'tensorrt'],
+    'tpu': ['tensorflow']
 }
 
 COLOR_MAP = {'OK': '\033[92m', 'ERROR': '\033[91m', 'RESET': '\033[0m'}
