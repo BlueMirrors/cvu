@@ -1,4 +1,4 @@
-"""Sample CVU usage.
+"""Benchmark default CVU models in different backends.
 """
 import time
 import os
@@ -11,12 +11,13 @@ from cvu.detector import Detector
 from cvu.utils.backend.package import setup
 from cvu.utils.google_utils import gdrive_download
 
-
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
     'gpu': ['onnx', 'torch', 'tflite', 'tensorflow', 'tensorrt'],
     'tpu': ['tflite']
 }
+
+COLOR_MAP = {'OK': '\033[92m', 'ERROR': '\033[91m', 'RESET': '\033[0m'}
 
 
 def install_dependencies() -> None:
@@ -42,10 +43,7 @@ def setup_static_files(no_video: bool = False) -> None:
         gdrive_download("1rioaBCzP9S31DYVh-tHplQ3cgvgoBpNJ", "temp/people.mp4")
 
 
-def test_image(backends: list,
-               img: str,
-               iterations: int,
-               warmups: int,
+def test_image(backends: list, img: str, iterations: int, warmups: int,
                device: str) -> None:
     """Benchmark default model of backend with read/write image
 
@@ -74,19 +72,16 @@ def test_image(backends: list,
         for _ in range(iterations):
             detector(frame)
         delta = time.time() - start
-        print(f"FPS({backend}): ", (iterations) / delta)
+        print(COLOR_MAP['OK'] + f"FPS({backend}): " + COLOR_MAP['RESET'],
+              (iterations) / delta)
 
         # write output
         detector(frame).draw(frame)
         cv2.imwrite(f'{img.split(".")[0]}_{backend}.jpg', frame)
 
 
-def test_video(backends: list,
-               video: str,
-               max_frames: int,
-               warmups: int,
-               device: str,
-               no_write: bool) -> None:
+def test_video(backends: list, video: str, max_frames: int, warmups: int,
+               device: str, no_write: bool) -> None:
     """Benchmark default model of backend with read/write 
     video and option to not write output.
     Args:
@@ -128,7 +123,8 @@ def test_video(backends: list,
                 break
 
         delta = time.time() - start
-        print(f"FPS({backend}): ", (reader.frame_count - warmups) / delta)
+        print(COLOR_MAP['OK'] + f"FPS({backend}): " + COLOR_MAP['RESET'],
+              (reader.frame_count - warmups) / delta)
         if not no_write:
             writer.release()
         reader.release()
@@ -140,9 +136,18 @@ if __name__ == "__main__":
                         nargs='+',
                         default=[],
                         help="name(s) of the backend")
-    PARSER.add_argument('-img', type=str, default='zidane.jpg', help="image to inference")
-    PARSER.add_argument('-video', type=str, default='people.mp4', help="video to inference")
-    PARSER.add_argument('-device', type=str, help='cpu or gpu or tpu', required=True)
+    PARSER.add_argument('-img',
+                        type=str,
+                        default=None,
+                        help="image to inference")
+    PARSER.add_argument('-video',
+                        type=str,
+                        default=None,
+                        help="video to inference")
+    PARSER.add_argument('-device',
+                        type=str,
+                        help='cpu or gpu or tpu',
+                        required=True)
     PARSER.add_argument('-warmups',
                         type=int,
                         default=5,
@@ -155,12 +160,20 @@ if __name__ == "__main__":
                         type=int,
                         default=500,
                         help='number of frames to benchmark for')
-    PARSER.add_argument('-no-write', action='store_true', default=False, help='do not write output')
-
+    PARSER.add_argument('-no-write',
+                        action='store_true',
+                        default=False,
+                        help='do not write output')
+                        
     OPT = PARSER.parse_args()
     if not OPT.backend:
         OPT.backend = BACKEND_FROM_DEVICE[OPT.device]
     if OPT.img:
-        test_image(OPT.backend, OPT.img, OPT.iterations, OPT.warmups, OPT.device)
+        test_image(OPT.backend, OPT.img, OPT.iterations, OPT.warmups,
+                   OPT.device)
+    elif OPT.video:
+        test_video(OPT.backend, OPT.video, OPT.max_frames, OPT.warmups,
+                   OPT.device, OPT.no_write)
     else:
-        test_video(OPT.backend, OPT.video, OPT.max_frames, OPT.warmups, OPT.device, OPT.no_write)
+        print(COLOR_MAP['ERROR'] + "Please provide either -img or -video" +
+              COLOR_MAP['RESET'])
