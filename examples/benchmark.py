@@ -15,6 +15,7 @@ from cvu.utils.backend.package import setup
 from cvu.utils.google_utils import gdrive_download
 
 #TODO - Combine benchmarks at the end
+#TODO - function to print color strings
 
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
@@ -84,13 +85,13 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         for _ in range(iterations):
             detector(frame)
         delta = time.time() - start
-        print(COLOR_MAP['OK'] + f"FPS({backend}): " + COLOR_MAP['RESET'],
-              (iterations) / delta)
+        print(COLOR_MAP['OK'] + f"FPS({backend}): {(iterations) / delta}" +
+              COLOR_MAP['RESET'])
 
         # write output
         detector(frame).draw(frame)
         cv2.imwrite(f'{img.split(".")[0]}_{backend}.jpg', frame)
-        print(COLOR_MAP['ERROR'] +
+        print(COLOR_MAP['CYAN'] +
               f'Image saved at: {img.split(".")[0]}_{backend}.jpg' +
               COLOR_MAP['RESET'])
 
@@ -139,10 +140,11 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
                 break
 
         delta = time.time() - start
-        print(COLOR_MAP['OK'] + f"FPS({backend}): " + COLOR_MAP['RESET'],
-              (reader.frame_count - warmups) / delta)
+        print(COLOR_MAP['OK'] +
+              f"FPS({backend}): {(reader.frame_count - warmups) / delta}" +
+              COLOR_MAP['RESET'])
         if not no_write:
-            print(COLOR_MAP['ERROR'] +
+            print(COLOR_MAP['CYAN'] +
                   f'Video saved at: {video.split(".")[0]}_{backend}.mp4' +
                   COLOR_MAP['RESET'])
             writer.release()
@@ -187,6 +189,7 @@ if __name__ == "__main__":
 
     # set default warmup and iterations if device=gpu
     if OPT.device == 'gpu':
+        #TODO - check iterations > warmups and tell user if otherwise
         OPT.warmups = 50
         OPT.iterations = 500
     if not OPT.backend:
