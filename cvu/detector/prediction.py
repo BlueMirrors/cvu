@@ -98,9 +98,12 @@ class Prediction(IPrediction):
             and bounding box's coordinates (top-left and
             bottom-right coordinates).
         """
-        return (f"id:{self.obj_id:<2}\tclass={self.class_name.title():<5}\t" +
-                f"top-left=({self.bbox[0]}, {self.bbox[1]:<5});\t" +
-                f"bottom-right=({self.bbox[2]}, {self.bbox[3]})")
+        return "\t".join([
+            f"id:{self.obj_id}", f"class={self.class_name.title()};",
+            f"conf={self.confidence};",
+            f"top-left=({self.bbox[0]}, {self.bbox[1]:<5});",
+            f"bottom-right=({self.bbox[2]}, {self.bbox[3]})"
+        ])
 
     def draw(self, image: np.ndarray) -> None:
         """Draws detected object on the image (inplace)
@@ -108,5 +111,5 @@ class Prediction(IPrediction):
         Args:
             image (np.ndarray): BGR image
         """
-        title = f"{self.obj_id}.{self.class_name}({self.confidence})"
+        title = f"{self.obj_id}.{self.class_name.title()} ({round(100*self.confidence, 2)}%)"
         draw_bbox(image, self.bbox, title=title)
