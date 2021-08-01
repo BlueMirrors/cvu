@@ -1,15 +1,14 @@
 """Benchmark default CVU models in different backends.
 """
-import sys
-
-sys.path.insert(0, "./")
-import time
 import os
+import sys
+import importlib
+import time
 import argparse
 
 import cv2
-import importlib
 
+sys.path.insert(0, "./")
 from cvu.detector import Detector
 from cvu.utils.backend.package import setup
 from cvu.utils.google_utils import gdrive_download
@@ -107,7 +106,7 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
 
 def test_video(backends: list, video: str, max_frames: int, warmups: int,
                device: str, no_write: bool) -> None:
-    """Benchmark default model of backend with read/write 
+    """Benchmark default model of backend with read/write
     video and option to not write output.
     Args:
         backend (list): list of backends
@@ -234,7 +233,7 @@ if __name__ == "__main__":
     else:
         # run inference on default image and videos
         print(COLOR_MAP['OK'] +
-              "As no -img or -video argument was passed, the tool will" +
+              "As no -img or -video argument was passed, the tool will " +
               "download default image and video and run benchmark on it." +
               COLOR_MAP['RESET'])
         print(COLOR_MAP['YELLOW'] + "IMAGE BENCHMARK" + COLOR_MAP['RESET'])
