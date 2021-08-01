@@ -28,7 +28,18 @@ COLOR_MAP = {
     'HEADER': '\033[95m'
 }
 
-BACKEND_BENCHMARKS = {}
+
+def print_benchmark(backend_benchmark: dict) -> None:
+    """Print benchmark results.
+
+    Args:
+        backend_benchmark (dict): dictionary of backend -> benchmark
+    """
+    for backend in sorted(backend_benchmark,
+                          key=lambda key: -backend_benchmark[key]):
+        print(COLOR_MAP['OK'],
+              f"FPS({backend}): {round(backend_benchmark[backend], 3)}",
+              COLOR_MAP['RESET'])
 
 
 def install_dependencies() -> None:
@@ -64,6 +75,7 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         iterations (int): number of iterations to benchmark for.
         warmups (int): number of iterations for warmup.
     """
+    backend_benchmark = {}
     # download files if needed
     if img == 'zidane.jpg':
         setup_static_files(no_video=True)
@@ -82,26 +94,20 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         start = time.time()
         for _ in range(iterations):
             detector(frame)
-        delta = time.time() - start
-        BACKEND_BENCHMARKS[backend] = f"FPS({backend}): {iterations / delta}"
-        print(COLOR_MAP['OK'] + f'{backend}: {BACKEND_BENCHMARKS[backend]}' +
+        backend_benchmark[backend] = iterations / (time.time() - start)
+        print(COLOR_MAP['OK'],
+              f"FPS({backend}): {round(backend_benchmark[backend],3)}",
               COLOR_MAP['RESET'])
 
         # write output
         detector(frame).draw(frame)
         cv2.imwrite(f'{img.split(".")[0]}_{backend}.jpg', frame)
-        print(COLOR_MAP['CYAN'] +
-              f'Image saved at: {img.split(".")[0]}_{backend}.jpg' +
+        print(COLOR_MAP['CYAN'],
+              f'Image saved at: {img.split(".")[0]}_{backend}.jpg',
               COLOR_MAP['RESET'])
 
     # sort benchmarks and print
-    for benchmarks in dict(
-            sorted(BACKEND_BENCHMARKS.items(),
-                   key=lambda item: item[1],
-                   reverse=False)):
-        print(COLOR_MAP['OK'] +
-              f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
-              COLOR_MAP['RESET'])
+    print_benchmark(backend_benchmark)
 
 
 def test_video(backends: list, video: str, max_frames: int, warmups: int,
@@ -116,6 +122,7 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
         device (str): device to benchmark on.
         no_write (bool): don't write output.
     """
+    backend_benchmark = {}
     # download files if needed
     if video == 'people.mp4':
         setup_static_files()
@@ -148,25 +155,20 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
             if reader.frame_count > max_frames:
                 break
 
-        delta = time.time() - start
-        BACKEND_BENCHMARKS[
-            backend] = f"FPS({backend}): {(reader.frame_count - warmups) / delta}"
-        print(COLOR_MAP['OK'] + f'{backend}: {BACKEND_BENCHMARKS[backend]}' +
+        backend_benchmark[backend] = (reader.frame_count -
+                                      warmups) / (time.time() - start)
+        print(COLOR_MAP['OK'],
+              f"FPS({backend}): {round(backend_benchmark[backend],3)}",
               COLOR_MAP['RESET'])
         if not no_write:
-            print(COLOR_MAP['CYAN'] +
-                  f'Video saved at: {video.split(".")[0]}_{backend}.mp4' +
+            print(COLOR_MAP['CYAN'],
+                  f'Video saved at: {video.split(".")[0]}_{backend}.mp4',
                   COLOR_MAP['RESET'])
             writer.release()
         reader.release()
 
-    for benchmarks in dict(
-            sorted(BACKEND_BENCHMARKS.items(),
-                   key=lambda item: item[1],
-                   reverse=False)):
-        print(COLOR_MAP['OK'] +
-              f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
-              COLOR_MAP['RESET'])
+    # sort and print benchmarks
+    print_benchmark(backend_benchmark)
 
 
 if __name__ == "__main__":
@@ -209,16 +211,16 @@ if __name__ == "__main__":
     if OPT.device == 'gpu':
         if OPT.warmups < 50:
             OPT.warmups = 50
-            print(COLOR_MAP['HEADER'] +
-                  "For better benchmark results, provide warmups equal to " +
-                  "or greater than 50. Setting default value as 50." +
+            print(COLOR_MAP['HEADER'],
+                  "For better benchmark results, provide warmups equal to",
+                  "or greater than 50. Setting default value as 50.",
                   COLOR_MAP['RESET'])
         if OPT.iterations <= OPT.warmups:
             OPT.iterations = OPT.warmups + 10
             print(
-                COLOR_MAP['HEADER'] +
-                "Iterations should be greater than warmups for better benchmark results."
-                + f"Setting default value as {OPT.warmups + 10}" +
+                COLOR_MAP['HEADER'],
+                "Iterations should be greater than warmups for better benchmark results.",
+                f"Setting default value as {OPT.warmups + 10}",
                 COLOR_MAP['RESET'])
     # set default backend if backend not specified
     if not OPT.backend:
@@ -232,13 +234,13 @@ if __name__ == "__main__":
                    OPT.device, OPT.no_write)
     else:
         # run inference on default image and videos
-        print(COLOR_MAP['OK'] +
-              "As no -img or -video argument was passed, the tool will " +
-              "download default image and video and run benchmark on it." +
+        print(COLOR_MAP['OK'],
+              "As no -img or -video argument was passed, the tool will",
+              "download default image and video and run benchmark on it.",
               COLOR_MAP['RESET'])
-        print(COLOR_MAP['YELLOW'] + "IMAGE BENCHMARK" + COLOR_MAP['RESET'])
+        print(COLOR_MAP['YELLOW'], "IMAGE BENCHMARK", COLOR_MAP['RESET'])
         test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
                    OPT.device)
-        print(COLOR_MAP['YELLOW'] + "VIDEO BENCHMARK" + COLOR_MAP['RESET'])
+        print(COLOR_MAP['YELLOW'], "VIDEO BENCHMARK", COLOR_MAP['RESET'])
         test_video(OPT.backend, "people.mp4", OPT.max_frames, OPT.warmups,
                    OPT.device, OPT.no_write)
