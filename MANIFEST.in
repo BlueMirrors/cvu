@@ -1,0 +1,1 @@
+include cvu/detector/yolov5/backends/weights/*.json
