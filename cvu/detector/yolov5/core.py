@@ -168,11 +168,13 @@ class Yolov5(ICore):
         if backend_name in ['torch', 'onnx', 'tensorrt']:
             self._preprocess.append(hwc_to_chw)
 
-        if backend_name in ['onnx', 'tensorflow', 'tensorrt', 'tflite']:
-            self._preprocess.append(basic_preprocess)
-
         # contigousarray
         self._preprocess.append(np.ascontiguousarray)
+
+        # add common preprocess
+        if backend_name in ['onnx', 'tensorflow', 'tflite', 'tensorrt']:
+            self._preprocess.append(basic_preprocess)
+
 
     def _load_classes(self, classes: Union[str, List[str]]) -> None:
         """Internally loads target classes
