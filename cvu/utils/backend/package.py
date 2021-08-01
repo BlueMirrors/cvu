@@ -92,6 +92,10 @@ def attempt_import(package: str,
         # disable GPUs explicitly
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+    elif "CUDA_VISIBLE_DEVICES" in os.environ:
+        # activate gpu again
+        del os.environ["CUDA_VISIBLE_DEVICES"]
+
     # sanitize (for example tensorflow-gpu => tensorflow)
     package = package.split('-')[0]
 

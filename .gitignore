@@ -143,3 +143,6 @@ temp
 *.pt
 **/weights/**
 !*.json
+
+# Ignore VSCode
+*.vscode
