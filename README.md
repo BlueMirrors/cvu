@@ -18,16 +18,16 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 # Index 📋
 
-- [Getting Started](#cvu-says-hi)
+- [Getting Started](#cvu-says-hi-)
 - [What and why is CVU?](#why-cvu)
-- [Yolov5 Object Detection](#yolov5-object-detection)
+- [Object Detection (Yolov5)](#yolov5-object-detection)
   - [TensorRT](#tensorrt)
   - [Torch](#torch)
   - [ONNX](#onnx)
   - [TensorFlow](#tensorflow)
   - [TFLite](#tflite)
 - [Devices (CPU, GPU, TPU)](#devices)
-- [Benchmarks (Yolov5)](#benchmarks-yolov5)
+- [Benchmark-Tool (Yolov5)](#benchmarks-yolov5)
 - [Benchmarks Results (Yolov5)](#yolov5-benchmark-results)
 - [Precission Accuracy (Yolov5)](#precission-accuracy-yolov5))
 - [Examples](examples/example_video_tutorial.py)
@@ -35,6 +35,8 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 <br>
 
 # CVU Says Hi <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25">!
+
+[Index](#index-)
 
 Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the experts and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br><br>
 
@@ -112,7 +114,7 @@ You can change device, platforms and backends as much as you need and want, with
 
 # Why CVU?
 
-[Index](#Index)
+[Index](#index-)
 
 There are countless great open-source state-of-the-art computer vision models that are pushing Computer Vision field ahead every moment. But many of them are either too complicated or hard to use in deployment scenario or to integrate in simple projects.
 
@@ -122,6 +124,8 @@ We are working to optimize open source state-of-the-art models for various CV us
 <br> <br>
 
 # Yolov5 Object Detection
+
+[Index](#index-)
 
 ```python
 from cvu.detector import Detector
@@ -199,7 +203,9 @@ As of our first alpha release, we only support `Yolov5s` models.
 
 <br>
 
-## Yolov5
+# Yolov5
+
+[Index](#index-)
 
 [Yolov5](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/yolov5/core.py) is one of the state of the art Object Detection models. Please check out more about it and train your own custom models through it's [official repo](https://github.com/ultralytics/yolov5). CVU also supports custom weights for all the backends.
 
@@ -214,6 +220,8 @@ Checkout following backends for more specific information
 <br>
 
 # TensorRT
+
+[Index](#index-)
 
 (Only supported for NVIDIA-GPUs, Tested on Linux Devices, Partial Dynamic Support)
 
@@ -252,6 +260,8 @@ Notes
 
 # Torch
 
+[Index](#index-)
+
 (Supports every device and platform except TPU, Full Dynamic Support)
 
 You can use Torch powered detector by specifying the backend parameter.
@@ -280,6 +290,8 @@ Now simply set parameter `weights="path_to_custom_weights.pt` in Detector initia
 
 # ONNX
 
+[Index](#index-)
+
 (Supports every device and platform except TPU, Full Dynamic Support)
 
 You can use ONNX powered detector by specifying the backend parameter.
@@ -304,7 +316,11 @@ python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 
 Now simply set parameter `weights="path_to_custom_weights.onnx` in Detector initialization, and you're ready for inference.
 
+<br><br>
+
 # TFLite
+
+[Index](#index-)
 
 (Supports CPU on every platform, Full Dynamic Support)
 
@@ -329,6 +345,8 @@ Notes
 
 # Tensorflow
 
+[Index](#index-)
+
 (Supports every device on every platform including TPU, Full Dynamic Support)
 
 You can use TensorFlow powered detector by specifying the backend parameter.
@@ -345,6 +363,8 @@ We will update dynamic export info soon, please check back again.
 <br><br>
 
 # Devices
+
+[Index](#index-)
 
 ### Support Info
 
@@ -370,6 +390,8 @@ Based on FPS performance and various benchmarks
 
 # Benchmarks (Yolov5)
 
+[Index](#index-)
+
 You can run your own benchmarks using our [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/benchmark.py)
 
 Run Benchmark over all supported backends for GPU/CPU/TPU (without and without read/write overhead)
@@ -389,6 +411,8 @@ Checkout [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/b
 <br>
 
 # Yolov5 Benchmark Results
+
+[Index](#index-)
 
 ## GPU (Colab-NVIDIA T4)
 
@@ -432,6 +456,8 @@ Based on 500 inference interations after 10 iterations of warmups. Includes Imag
 <br><br>
 
 # Precission Accuracy (Yolov5)
+
+[Index](#index-)
 
 For a successful deployment, precission is also important (i.e. closness to results of native-framework of trained weights). We will add more numerical results soon, for now we provide image comparison.
 
