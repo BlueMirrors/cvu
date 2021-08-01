@@ -15,7 +15,7 @@ from cvu.utils.google_utils import gdrive_download
 
 BACKEND_FROM_DEVICE = {
     'cpu': ['onnx', 'torch', 'tflite', 'tensorflow'],
-    'gpu': ['tensorflow', 'onnx', 'torch', 'tensorrt'],
+    'gpu': ['onnx', 'torch', 'tensorrt', 'tensorflow'],
     'tpu': ['tensorflow']
 }
 
