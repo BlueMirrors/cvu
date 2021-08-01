@@ -85,6 +85,8 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
             detector(frame)
         delta = time.time() - start
         BACKEND_BENCHMARKS[backend] = f"FPS({backend}): {iterations / delta}"
+        print(COLOR_MAP['OK'] + f'{backend}: {BACKEND_BENCHMARKS[backend]}' +
+              COLOR_MAP['RESET'])
 
         # write output
         detector(frame).draw(frame)
@@ -93,7 +95,11 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
               f'Image saved at: {img.split(".")[0]}_{backend}.jpg' +
               COLOR_MAP['RESET'])
 
-    for benchmarks in BACKEND_BENCHMARKS:
+    # sort benchmarks and print
+    for benchmarks in dict(
+            sorted(BACKEND_BENCHMARKS.items,
+                   key=lambda item: item[1],
+                   reverse=True)):
         print(COLOR_MAP['OK'] +
               f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
               COLOR_MAP['RESET'])
@@ -119,6 +125,7 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
     # setup
     vidsz = install_dependencies()
 
+    # loop over backends
     for backend in backends:
         detector = Detector(classes='coco', backend=backend, device=device)
         reader = vidsz.Reader(video)
@@ -145,6 +152,8 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
         delta = time.time() - start
         BACKEND_BENCHMARKS[
             backend] = f"FPS({backend}): {(reader.frame_count - warmups) / delta}"
+        print(COLOR_MAP['OK'] + f'{backend}: {BACKEND_BENCHMARKS[backend]}' +
+              COLOR_MAP['RESET'])
         if not no_write:
             print(COLOR_MAP['CYAN'] +
                   f'Video saved at: {video.split(".")[0]}_{backend}.mp4' +
@@ -196,9 +205,19 @@ if __name__ == "__main__":
 
     # set default warmup and iterations if device=gpu
     if OPT.device == 'gpu':
-        #TODO - check iterations > warmups and tell user if otherwise
-        OPT.warmups = 50
-        OPT.iterations = 500
+        if OPT.warmups < 50:
+            OPT.warmups = 50
+            print(COLOR_MAP['HEADER'] +
+                  "For better benchmark results, provide warmups equal to " +
+                  "or greater than 50. Setting default value as 50." +
+                  COLOR_MAP['RESET'])
+        if OPT.iterations <= OPT.warmups:
+            OPT.iterations = OPT.warmups + 10
+            print(
+                COLOR_MAP['HEADER'] +
+                "Iterations should be greater than warmups for better benchmark results."
+                + f"Setting default value as {OPT.warmups + 10}" +
+                COLOR_MAP['RESET'])
     # set default backend if backend not specified
     if not OPT.backend:
         OPT.backend = BACKEND_FROM_DEVICE[OPT.device]
