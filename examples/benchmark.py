@@ -97,9 +97,9 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
 
     # sort benchmarks and print
     for benchmarks in dict(
-            sorted(BACKEND_BENCHMARKS.items,
+            sorted(BACKEND_BENCHMARKS.items(),
                    key=lambda item: item[1],
-                   reverse=True)):
+                   reverse=False)):
         print(COLOR_MAP['OK'] +
               f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
               COLOR_MAP['RESET'])
@@ -161,7 +161,10 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
             writer.release()
         reader.release()
 
-    for benchmarks in BACKEND_BENCHMARKS:
+    for benchmarks in dict(
+            sorted(BACKEND_BENCHMARKS.items(),
+                   key=lambda item: item[1],
+                   reverse=False)):
         print(COLOR_MAP['OK'] +
               f'{benchmarks}: {BACKEND_BENCHMARKS[benchmarks]}' +
               COLOR_MAP['RESET'])
@@ -234,7 +237,9 @@ if __name__ == "__main__":
               "As no -img or -video argument was passed, the tool will" +
               "download default image and video and run benchmark on it." +
               COLOR_MAP['RESET'])
+        print(COLOR_MAP['YELLOW'] + "IMAGE BENCHMARK" + COLOR_MAP['RESET'])
         test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
                    OPT.device)
+        print(COLOR_MAP['YELLOW'] + "VIDEO BENCHMARK" + COLOR_MAP['RESET'])
         test_video(OPT.backend, "people.mp4", OPT.max_frames, OPT.warmups,
                    OPT.device, OPT.no_write)
