@@ -70,8 +70,8 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         img = 'temp/zidane.jpg'
 
     # setup
-    frame = cv2.imread(img)
     for backend in backends:
+        frame = cv2.imread(img)
         detector = Detector(classes='coco', backend=backend, device=device)
 
         # Warm up
