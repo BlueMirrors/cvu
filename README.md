@@ -1,7 +1,8 @@
 # <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="30"> CVU: Computer Vision Utils
 
 [![CodeFactor](https://www.codefactor.io/repository/github/bluemirrors/cvu/badge?s=700eb6a402321377322a7f4c15ebf99055e0c299)](https://www.codefactor.io/repository/github/bluemirrors/cvu) [![stability-alpha](https://img.shields.io/badge/stability-alpha-f4d03f.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#alpha)
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Downloads](https://pepy.tech/badge/cvu-python)](https://pepy.tech/project/cvu-python)
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Downloads](https://pepy.tech/badge/cvu-python)](https://pepy.tech/project/cvu-python) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
+
 
 <br>
 
@@ -22,9 +23,9 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 # Index 📋
 
-- [Getting Started](#cvu-says-hi-)
+- [Getting Started](#cvu-says-hi-) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
 - [What and why is CVU?](#why-cvu-)
-- [Object Detection (Yolov5)](#yolov5-object-detection)
+- [Object Detection (Yolov5)](#yolov5-object-detection) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
   - [TensorRT](#tensorrt)
   - [Torch](#torch)
   - [ONNX](#onnx)
