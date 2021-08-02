@@ -2,7 +2,8 @@
 
 [![CodeFactor](https://www.codefactor.io/repository/github/bluemirrors/cvu/badge?s=700eb6a402321377322a7f4c15ebf99055e0c299)](https://www.codefactor.io/repository/github/bluemirrors/cvu) [![stability-alpha](https://img.shields.io/badge/stability-alpha-f4d03f.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#alpha)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Downloads](https://pepy.tech/badge/cvu-python)](https://pepy.tech/project/cvu-python)
-<br><br>
+
+<br>
 
 Computer Vision deployment tools for dummies and experts.<br>
 
@@ -14,12 +15,13 @@ pip install cvu-python
 
 ✨✨
 CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting!✨✨
+
 <br>
 
 # Index 📋
 
 - [Getting Started](#cvu-says-hi-)
-- [What and why is CVU?](#why-cvu)
+- [What and why is CVU?](#why-cvu-)
 - [Object Detection (Yolov5)](#yolov5-object-detection)
   - [TensorRT](#tensorrt)
   - [Torch](#torch)
@@ -30,7 +32,8 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 - [Benchmark-Tool (Yolov5)](#benchmarks-yolov5)
 - [Benchmarks Results (Yolov5)](#yolov5-benchmark-results)
 - [Precission Accuracy (Yolov5)](#precission-accuracy-yolov5))
-- [Examples](examples/example_video_tutorial.py)
+- [Examples](https://github.com/BlueMirrors/cvu/tree/master/examples)
+- [References](#references)
 
 <br>
 
@@ -112,7 +115,7 @@ detector = Detector(classes="coco", backend="tensorflow", device="tpu")
 You can change device, platforms and backends as much as you need and want, without having to change your main pipeline.
 <br><br>
 
-# Why CVU?
+# Why CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25">?
 
 [Index](#index-)
 
