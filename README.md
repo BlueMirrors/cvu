@@ -14,8 +14,9 @@ pip install cvu-python
 <br>
 
 ✨✨
-CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting!
-[Nvidia-Jetson-Nano-Category](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Category](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Category](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
+CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍 &nbsp; on our submissions!
+
+[Nvidia-Jetson-Nano-Submission](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Submission](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Submission](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
 
 <br>
 
@@ -420,7 +421,7 @@ Checkout [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/b
 
 ## GPU (Colab-NVIDIA T4)
 
-Based on 5000 inference interations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
+Based on 5000 inference iterations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
 
 | Backend    | FPS     |
 | ---------- | ------- |
@@ -433,7 +434,7 @@ Based on 5000 inference interations after 50 iterations of warmups. Includes Ima
 
 ## GPU (Colab-NVIDIA P4)
 
-Based on 5000 inference interations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
+Based on 5000 inference iterations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
 
 | Backend    | FPS   |
 | ---------- | ----- |
@@ -448,7 +449,7 @@ Based on 5000 inference interations after 50 iterations of warmups. Includes Ima
 
 Note: We are performing more benchmarks, we will update info later on.
 
-Based on 500 inference interations after 10 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
+Based on 500 inference iterations after 10 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
 
 | Backend    | FPS     |
 | ---------- | ------- |
