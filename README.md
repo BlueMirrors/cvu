@@ -14,7 +14,8 @@ pip install cvu-python
 <br>
 
 ✨✨
-CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting!✨✨
+CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting!
+[Nvidia-Jetson-Nano-Category](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Category](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Category](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
 
 <br>
 
