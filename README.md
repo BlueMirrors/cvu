@@ -40,7 +40,7 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 <br>
 
-# CVU Says Hi <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25">!
+# CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25"> Says Hi!
 
 [Index](#index-)
 
