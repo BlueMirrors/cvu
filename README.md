@@ -23,7 +23,7 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 # Index 📋
 
-- [Getting Started](#cvu-says-hi-) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
+- [Getting Started](#cvu--says-hi) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
 - [What and why is CVU?](#why-cvu-)
 - [Object Detection (Yolov5)](#yolov5-object-detection) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
   - [TensorRT](#tensorrt)
