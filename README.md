@@ -251,7 +251,7 @@ Make sure you use the `---dynamic` flag while exporting your custom weights.
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.onnx` in Detector initialization, and you're ready for inference.
+Now simply set parameter `weights="path_to_custom_weights.onnx"` in Detector initialization, and you're ready for inference.
 
 <br>
 Notes
