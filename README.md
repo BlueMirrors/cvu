@@ -15,7 +15,7 @@ pip install cvu-python
 <br>
 
 ✨✨
-CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍 &nbsp; on our submissions!
+CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍&nbsp;on our submissions!
 
 [Nvidia-Jetson-Nano-Submission](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Submission](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Submission](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
 
@@ -25,7 +25,7 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 - [Getting Started](#cvu--says-hi) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
 - [What and why is CVU?](#why-cvu-)
-- [Object Detection (Yolov5)](#yolov5-object-detection) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
+- [Object Detection (Yolov5)](#object-detection-yolov5) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
   - [TensorRT](#tensorrt)
   - [Torch](#torch)
   - [ONNX](#onnx)
@@ -44,9 +44,9 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 [Index](#index-)
 
-Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the experts and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br><br>
+Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the expert and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br>
 
-For example, how much installation-steps and code would you need to run object detection on a video with a TensorRT backend? How complicated can it be to test that pipeline out in Colab?<br><br>
+For example, how much installation-steps and code will you need to run object detection on a video with a TensorRT backend? How complicated is it be to test that pipeline in Colab?<br><br>
 
 With CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12">, you just need the following! No extra installation steps needed to run on Colab, just pip install our tool, and you're all set to go!<br>
 
@@ -81,7 +81,7 @@ reader.release()
 
 <br>
 
-Wants to use even less lines of code? How about this! <br>
+Want to use less lines of code? How about this! <br>
 
 ```python
 from cvu.detector import Detector
@@ -97,7 +97,7 @@ with Reader("example.mp4") as reader:
 
 <br>
 
-Want to switch to non-cuda devic? Just set `device="cpu"`, and backend to `"onnx"`, `"tflite"`, `"torch"` or `"tensorflow"`.
+Want to switch to non-cuda device? Just set `device="cpu"`, and backend to `"onnx"`, `"tflite"`, `"torch"` or `"tensorflow"`.
 
 <br>
 
@@ -107,7 +107,7 @@ detector = Detector(classes="coco", backend="onnx", device="cpu")
 
 <br>
 
-Want to use TPU? Just set `device="tpu"` and choose a supported backend (only `"tensorflow"` as of the latest release)
+Want to use TPU? Just set `device="tpu"` and choose a supported backend (only `"tensorflow"` supported as of the latest release)
 
 <br>
 
@@ -115,21 +115,21 @@ Want to use TPU? Just set `device="tpu"` and choose a supported backend (only `"
 detector = Detector(classes="coco", backend="tensorflow", device="tpu")
 ```
 
-You can change device, platforms and backends as much as you need and want, without having to change your main pipeline.
+You can change devices, platforms and backends as much as you want, without having to change your pipeline.
 <br><br>
 
 # Why CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25">?
 
 [Index](#index-)
 
-There are countless great open-source state-of-the-art computer vision models that are pushing Computer Vision field ahead every moment. But many of them are either too complicated or hard to use in deployment scenario or to integrate in simple projects.
+There are countless amazing open-source state-of-the-art Computer Vision models that are pushing Computer Vision ahead every moment. But many of them are either too complicated or hard to use in deployment scenarios or to integrate in simple projects.
 
 CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can handle all the Computer vision related stuff (even installation of the required frameworks/libraries in most cases), while you can focus on building awesome projects!!
 
 We are working to optimize open source state-of-the-art models for various CV use cases, and aim to make them more accessible and available to everyone!
 <br> <br>
 
-# Yolov5 Object Detection
+# Object Detection (YOLOv5)
 
 [Index](#index-)
 
@@ -203,17 +203,17 @@ These wrappers around detections provides various functionalities for drawing bo
 
 <br>
 
-Every Object detectors is implemented in `cvu.detector`, following a common [interface](https://github.com/BlueMirrors/cvu/blob/master/cvu/interface/core.py).
+Every Object detector is implemented in `cvu.detector`, following a common [interface](https://github.com/BlueMirrors/cvu/blob/master/cvu/interface/core.py).
 
 As of our first alpha release, we only support `Yolov5s` models.
 
 <br>
 
-# Yolov5
+# YOLOv5
 
 [Index](#index-)
 
-[Yolov5](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/yolov5/core.py) is one of the state of the art Object Detection models. Please check out more about it and train your own custom models through it's [official repo](https://github.com/ultralytics/yolov5). CVU also supports custom weights for all the backends.
+[YOLOv5](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/yolov5/core.py) is one of the state-of-the-art Object Detection models. Please check out more about it and train your own custom models through it's [official repo](https://github.com/ultralytics/yolov5). CVU also supports custom weights for all the backends.
 
 Checkout following backends for more specific information
 
@@ -238,9 +238,9 @@ from cvu.detector import Detector
 detector = Detector(classes="coco", backend = "tensorrt"))
 ```
 
-Internally, Detector will build TensorRT Cuda-Engine using pretrained ONNX Yolov5s weight file.
+Internally, the Detector will build TensorRT Cuda-Engine using pretrained ONNX Yolov5s weight file.
 
-If you want to run detector for your custom weights, simply do following
+If you want to run the detector for your custom weights, simply do the following:
 
 - [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
 - [Export Weights PyTorch weights to ONNX](https://github.com/ultralytics/yolov5/blob/master/export.py)
@@ -277,20 +277,20 @@ from cvu.detector import Detector
 detector = Detector(classes="coco", backend = "torch"))
 ```
 
-Internally, Detector will load Torchscript (JIT) pretrained Yolov5s weight model.
+Internally, the Detector will load Torchscript (JIT) pretrained Yolov5s weight model.
 
-If you want to run detector for your custom weights, simply do following
+If you want to run the detector for your custom weights, simply do the following:
 
 - [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
 - [Export Weights PyTorch weights to TorchScript](https://github.com/ultralytics/yolov5/blob/master/export.py)
 
-Make sure your model is on correct device (CUDA can save torchscript in Float16 format which is unavailable/inefficient in many CPU) while exporting your custom weights. It's recommended to add `--half` flag for CUDA usage.
+Make sure your model is on the correct device (CUDA can save torchscript in Float16 format which is unavailable/inefficient in many CPUs) while exporting your custom weights. It's recommended to add `--half` flag for CUDA.
 
 ```bash
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --include torchscript
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.pt` in Detector initialization, and you're ready for inference.
+Now simply set parameter `weights="path_to_custom_weights.pt` in the Detector initialization, and you're ready for inference.
 
 <br><br>
 
@@ -307,9 +307,9 @@ from cvu.detector import Detector
 detector = Detector(classes="coco", backend = "onnx"))
 ```
 
-Internally, Detector will load ONNX pretrained Yolov5s weight model.
+Internally, the Detector will load ONNX pretrained Yolov5s weight model.
 
-If you want to run detector for your custom weights, simply do following
+If you want to run the detector for your custom weights, simply do the following:
 
 - [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
 - [Export Weights PyTorch weights to ONNX](https://github.com/ultralytics/yolov5/blob/master/export.py)
@@ -320,7 +320,7 @@ Make sure you use the `---dynamic` flag while exporting your custom weights.
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.onnx` in Detector initialization, and you're ready for inference.
+Now simply set parameter `weights="path_to_custom_weights.onnx` in the Detector initialization, and you're ready for inference.
 
 <br><br>
 
@@ -337,7 +337,7 @@ from cvu.detector import Detector
 detector = Detector(classes="coco", backend = "tflite"))
 ```
 
-Internally, Detector will load TFLite pretrained Yolov5s weight model.
+Internally, the Detector will load TFLite pretrained Yolov5s weight model.
 
 We will update dynamic export info soon, please check back again.
 
@@ -362,7 +362,7 @@ from cvu.detector import Detector
 detector = Detector(classes="coco", backend = "tensorflow"))
 ```
 
-Internally, Detector will load Tensorflow SavedModel pretrained Yolov5s weight model. You can also set `device='tpu'` (tested on colab)
+Internally, the Detector will load Tensorflow SavedModel pretrained Yolov5s weight model. You can also set `device='tpu'` (tested on colab)
 
 We will update dynamic export info soon, please check back again.
 
@@ -416,7 +416,7 @@ Checkout [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/b
 
 <br>
 
-# Yolov5 Benchmark Results
+# YOLOv5 Benchmark Results
 
 [Index](#index-)
 
