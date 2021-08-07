@@ -15,7 +15,7 @@ pip install cvu-python
 <br>
 
 ✨✨
-CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [Yolov5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍&nbsp;on our submissions!
+CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [YOLOv5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍&nbsp;on our submissions!
 
 [Nvidia-Jetson-Nano-Submission](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Submission](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Submission](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
 
@@ -25,16 +25,16 @@ CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/lo
 
 - [Getting Started](#cvu--says-hi) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
 - [What and why is CVU?](#why-cvu-)
-- [Object Detection (Yolov5)](#object-detection-yolov5) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
+- [Object Detection (YOLOv5)](#object-detection-yolov5) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
   - [TensorRT](#tensorrt)
   - [Torch](#torch)
   - [ONNX](#onnx)
   - [TensorFlow](#tensorflow)
   - [TFLite](#tflite)
 - [Devices (CPU, GPU, TPU)](#devices)
-- [Benchmark-Tool (Yolov5)](#benchmarks-yolov5)
-- [Benchmarks Results (Yolov5)](#yolov5-benchmark-results)
-- [Precission Accuracy (Yolov5)](#precission-accuracy-yolov5))
+- [Benchmark-Tool (YOLOv5)](#benchmarks-yolov5)
+- [Benchmarks Results (YOLOv5)](#yolov5-benchmark-results)
+- [Precission Accuracy (YOLOv5)](#precission-accuracy-yolov5))
 - [Examples](https://github.com/BlueMirrors/cvu/tree/master/examples)
 - [References](#references)
 
