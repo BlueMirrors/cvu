@@ -17,7 +17,7 @@ pip install cvu-python
 ✨✨
 CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> is participating in 🚀 [YOLOv5's export competition](https://github.com/ultralytics/yolov5/discussions/3213) 🚀. Please checkout our and other's great submissions, and maybe consider voting by giving 👍&nbsp;on our submissions!
 
-[Nvidia-Jetson-Nano-Submission](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1116707) | [Intel/AMD CPU-Submission](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Submission](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
+[Nvidia-Jetson-Nano-Submission](https://github.com/ultralytics/yolov5/discussions/3426#discussioncomment-1142611) | [Intel/AMD CPU-Submission](https://github.com/ultralytics/yolov5/discussions/3432#discussioncomment-1116718) | [Google Edge TPU-Submission](https://github.com/ultralytics/yolov5/discussions/3428#discussioncomment-1116728)✨✨
 
 <br>
 
