@@ -68,8 +68,8 @@ class Yolov5(ICore):
 
         # setup backend and load model
         setup_backend(backend, device)
-        self._load_model(backend, weight, device)
         self._load_classes(classes)
+        self._load_model(backend, weight, device)
 
     def __repr__(self) -> str:
         """Returns Backend and Model Information
