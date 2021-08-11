@@ -162,7 +162,8 @@ class Yolov5(ICore):
         if backend_name != 'tensorrt':
             self._model = backend.Yolov5(weight, device)
         else:
-            self._model = backend.Yolov5(weight)
+            self._model = backend.Yolov5(weight,
+                                         num_classes=len(self._classes))
 
         # add preprocess
         if backend_name in ['torch', 'onnx', 'tensorrt']:
@@ -174,7 +175,6 @@ class Yolov5(ICore):
         # add common preprocess
         if backend_name in ['onnx', 'tensorflow', 'tflite', 'tensorrt']:
             self._preprocess.append(basic_preprocess)
-
 
     def _load_classes(self, classes: Union[str, List[str]]) -> None:
         """Internally loads target classes
