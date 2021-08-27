@@ -251,7 +251,7 @@ Make sure you use the `---dynamic` flag while exporting your custom weights.
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.onnx"` in Detector initialization, and you're ready for inference.
+Now simply set parameter `weight="path_to_custom_weights.onnx"` in Detector initialization, and you're ready for inference.
 
 <br>
 Notes
@@ -290,7 +290,7 @@ Make sure your model is on the correct device (CUDA can save torchscript in Floa
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --include torchscript
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.pt` in the Detector initialization, and you're ready for inference.
+Now simply set parameter `weight="path_to_custom_weights.pt` in the Detector initialization, and you're ready for inference.
 
 <br><br>
 
@@ -320,7 +320,7 @@ Make sure you use the `---dynamic` flag while exporting your custom weights.
 python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 ```
 
-Now simply set parameter `weights="path_to_custom_weights.onnx` in the Detector initialization, and you're ready for inference.
+Now simply set parameter `weight="path_to_custom_weights.onnx` in the Detector initialization, and you're ready for inference.
 
 <br><br>
 
