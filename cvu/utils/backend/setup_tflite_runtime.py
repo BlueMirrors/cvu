@@ -3,7 +3,7 @@ Currently powered by tensorflow.lite
 """
 import tflite_runtime.interpreter as tflite
 
-__version__ = tflite_runtime.__version__
+__version__ = None
 
 
 def is_gpu_available() -> bool:

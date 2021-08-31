@@ -16,7 +16,7 @@ import numpy as np
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
-from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
+# from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
 class Yolov5(IModel):
@@ -96,8 +96,8 @@ class Yolov5(IModel):
 
         else:
             # import tflite_runtime.interpreter as tflite
-            import tensorflow.lite as tflite
-            from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_np as nms
+            import tflite_runtime.interpreter as tflite
+            from cvu.postprocess.nms.yolov5 import non_max_suppression_np as nms
 
         self._model = tflite.Interpreter(model_path=weight)  # pylint: disable=maybe-no-member
         self._input_details = self._model.get_input_details()
