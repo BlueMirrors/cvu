@@ -35,7 +35,8 @@ class Yolov5(ICore):
                  classes: Union[str, List[str]],
                  backend: str = "torch",
                  weight: str = "yolov5s",
-                 device: str = "auto") -> None:
+                 device: str = "auto",
+                 auto_install=True) -> None:
         """Initiate Yolov5 Object Detector
 
         Args:
@@ -67,7 +68,8 @@ class Yolov5(ICore):
         self._model = None
 
         # setup backend and load model
-        setup_backend(backend, device)
+        if auto_install:
+            setup_backend(backend, device)
         self._load_classes(classes)
         self._load_model(backend, weight, device)
 
