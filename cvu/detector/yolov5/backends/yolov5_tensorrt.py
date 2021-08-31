@@ -37,7 +37,8 @@ class Yolov5(IModel):
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
-                 input_shape=None) -> None:
+                 input_shape=None,
+                 batch_size=1) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
@@ -51,6 +52,7 @@ class Yolov5(IModel):
         # initiate model specific class attributes
         self._nc = num_classes
         self._input_shape = input_shape
+        self._batch_size = batch_size
 
         # initiate engine related class attributes
         self._engine = None
@@ -175,7 +177,7 @@ class Yolov5(IModel):
             # setup builder config
             config = builder.create_builder_config()
             config.max_workspace_size = 64 * 1 << 20  # 64 MB
-            builder.max_batch_size = 1
+            builder.max_batch_size = self._batch_size
 
             # FP16 quantization
             if self._fp16:
@@ -191,7 +193,7 @@ class Yolov5(IModel):
                         print(parser.get_error(error))
 
             # set input shape
-            network.get_input(0).shape = (1, 3, *input_shape)
+            network.get_input(0).shape = (self._batch_size, 3, *input_shape)
 
             # build engine
             engine = builder.build_engine(network, config)
@@ -303,7 +305,7 @@ class Yolov5(IModel):
             List[np.ndarray]: post-processed output after nms
         """
         # reshape into expected output shape
-        outputs = outputs[-1].reshape((1, -1, self._nc + 5))
+        outputs = outputs[-1].reshape((self._batch_size, -1, self._nc + 5))
         return non_max_suppression_np(outputs)
 
     def __repr__(self) -> str:
