@@ -157,13 +157,19 @@ class Yolov5(ICore):
             device (str): name of target device (auto, cpu, gpu, cuda, tpu)
         """
         # load model
-        backend = import_module(f".yolov5_{backend_name}", self._BACKEND_PKG)
-
-        if backend_name != 'tensorrt':
-            self._model = backend.Yolov5(weight, device)
+        if backend_name == "tflite_runtime":
+            backend = import_module(f".yolov5_tflite", self._BACKEND_PKG)
         else:
+            backend = import_module(f".yolov5_{backend_name}",
+                                    self._BACKEND_PKG)
+
+        if 'tflite' in backend_name:
+            self._model = backend.Yolov5(weight, device, backend_name)
+        elif backend_name == 'tensorrt':
             self._model = backend.Yolov5(weight,
                                          num_classes=len(self._classes))
+        else:
+            self._model = backend.Yolov5(weight, device)
 
         # add preprocess
         if backend_name in ['torch', 'onnx', 'tensorrt']:
@@ -173,7 +179,9 @@ class Yolov5(ICore):
         self._preprocess.append(np.ascontiguousarray)
 
         # add common preprocess
-        if backend_name in ['onnx', 'tensorflow', 'tflite', 'tensorrt']:
+        if backend_name in [
+                'onnx', 'tensorflow', 'tflite', 'tensorrt', 'tflite_runtime'
+        ]:
             self._preprocess.append(basic_preprocess)
 
     def _load_classes(self, classes: Union[str, List[str]]) -> None:

@@ -10,7 +10,8 @@ import os
 from typing import Tuple, List
 
 import numpy as np
-import tensorflow.lite as tflite
+# import tensorflow
+# import tensorflow.lite as tflite
 
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
@@ -26,7 +27,10 @@ class Yolov5(IModel):
 
     Inputs are expected to be normalized in channels-last order with batch axis.
     """
-    def __init__(self, weight: str = "yolov5s", device='auto') -> None:
+    def __init__(self,
+                 weight: str = "yolov5s",
+                 device='auto',
+                 backend_name='tflite') -> None:
         """Initiate Model
 
         Args:
@@ -49,7 +53,7 @@ class Yolov5(IModel):
         self._set_device(device)
 
         # load SavedModel
-        self._load_model(weight)
+        self._load_model(weight, backend_name)
 
     def _set_device(self, device: str) -> None:
         """Internally setup/initiate necessary device
@@ -67,13 +71,14 @@ class Yolov5(IModel):
         # set device
         self._device = device
 
-    def _load_model(self, weight: str) -> None:
+    def _load_model(self, weight: str, backend_name: str) -> None:
         """Internally loads TFLite Model
 
         Args:
             weight (str): path to TFLite weight files or predefined-identifiers
             (such as yolvo5s, yolov5m, etc.)
         """
+        global nms
         # attempt to load predefined weights
         if not os.path.exists(weight):
             weight += '.tflite'
@@ -85,6 +90,15 @@ class Yolov5(IModel):
             download_weights(weight, "tflite")
 
         # load model
+        if backend_name == "tflite":
+            import tensorflow.lite as tflite
+            from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf as nms
+
+        else:
+            # import tflite_runtime.interpreter as tflite
+            import tensorflow.lite as tflite
+            from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_np as nms
+
         self._model = tflite.Interpreter(model_path=weight)  # pylint: disable=maybe-no-member
         self._input_details = self._model.get_input_details()
         self._output_details = self._model.get_output_details()
@@ -142,6 +156,7 @@ class Yolov5(IModel):
         Returns:
             List[np.ndarray]: post-processed output
         """
+        global nms
         # apply nms
-        outputs = non_max_suppression_tf(outputs)
+        outputs = nms(outputs)
         return outputs

@@ -31,6 +31,15 @@ SUPPORTED_BACKENDS = {
         'args': None,
         'supported-devices': ['cpu']
     },
+    'tflite_runtime': {
+        'name': 'tflite_runtime',
+        'best-device': 'cpu',
+        'dependencies': None,
+        'version': None,
+        'device-agnostic': True,
+        'args': ["--index-url", "https://google-coral.github.io/py-repo/"],
+        'supported-devices': ['cpu']
+    },
     'onnx': {
         'name': 'onnxruntime',
         'best-device': 'cuda',
