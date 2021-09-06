@@ -35,7 +35,8 @@ class Yolov5(ICore):
                  classes: Union[str, List[str]],
                  backend: str = "torch",
                  weight: str = "yolov5s",
-                 device: str = "auto") -> None:
+                 device: str = "auto",
+                 auto_install: bool = True) -> None:
         """Initiate Yolov5 Object Detector
 
         Args:
@@ -56,6 +57,9 @@ class Yolov5(ICore):
             device (str, optional): name of the device to be used. Valid
             devices can be "cpu", "gpu", "cuda", "tpu", "auto". Defaults to "auto" which tries
             to use the device best suited for selected backend and the hardware avaibility.
+
+            auto_install (bool, optional): auto install missing requirements for the selected
+            backend.
         """
         # ICore
         super().__init__(classes, backend)
@@ -67,7 +71,8 @@ class Yolov5(ICore):
         self._model = None
 
         # setup backend and load model
-        setup_backend(backend, device)
+        if auto_install:
+            setup_backend(backend, device)
         self._load_classes(classes)
         self._load_model(backend, weight, device)
 
