@@ -36,7 +36,8 @@ class Yolov5(ICore):
                  backend: str = "torch",
                  weight: str = "yolov5s",
                  device: str = "auto",
-                 auto_install: bool = True) -> None:
+                 auto_install: bool = True,
+                 **kwargs) -> None:
         """Initiate Yolov5 Object Detector
 
         Args:
@@ -74,7 +75,7 @@ class Yolov5(ICore):
         if auto_install:
             setup_backend(backend, device)
         self._load_classes(classes)
-        self._load_model(backend, weight, device)
+        self._load_model(backend, weight, device, **kwargs)
 
     def __repr__(self) -> str:
         """Returns Backend and Model Information
@@ -153,7 +154,7 @@ class Yolov5(ICore):
                                       original_shape).round()
         return outputs
 
-    def _load_model(self, backend_name: str, weight: str, device: str) -> None:
+    def _load_model(self, backend_name: str, weight: str, device: str, **kwargs) -> None:
         """Internally loads Model (backend)
 
         Args:
@@ -168,7 +169,8 @@ class Yolov5(ICore):
             self._model = backend.Yolov5(weight, device)
         else:
             self._model = backend.Yolov5(weight,
-                                         num_classes=len(self._classes))
+                                         num_classes=len(self._classes),
+                                         **kwargs)
 
         # add preprocess
         if backend_name in ['torch', 'onnx', 'tensorrt']:
