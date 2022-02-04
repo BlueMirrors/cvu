@@ -8,7 +8,7 @@ will internally resolve and handle all internal details.
 Find more about Yolov5 here from their official repository
 https://github.com/ultralytics/yolov5
 """
-from typing import Callable, Tuple, Union, List
+from typing import Any, Callable, Tuple, Union, List
 from importlib import import_module
 
 import numpy as np
@@ -37,7 +37,7 @@ class Yolov5(ICore):
                  weight: str = "yolov5s",
                  device: str = "auto",
                  auto_install: bool = True,
-                 **kwargs) -> None:
+                 **kwargs: Any) -> None:
         """Initiate Yolov5 Object Detector
 
         Args:
@@ -154,7 +154,7 @@ class Yolov5(ICore):
                                       original_shape).round()
         return outputs
 
-    def _load_model(self, backend_name: str, weight: str, device: str, **kwargs) -> None:
+    def _load_model(self, backend_name: str, weight: str, device: str, **kwargs: Any) -> None:
         """Internally loads Model (backend)
 
         Args:
