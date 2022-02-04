@@ -38,7 +38,7 @@ class Yolov5(IModel):
                  weight: str = None,
                  num_classes: int = 80,
                  input_shape=None,
-                 fp16: bool = False) -> None:
+                 fp16: bool = True) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
