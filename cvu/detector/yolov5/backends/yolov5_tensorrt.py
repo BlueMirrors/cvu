@@ -37,7 +37,8 @@ class Yolov5(IModel):
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
-                 input_shape=None) -> None:
+                 input_shape=None,
+                 fp16: bool = True) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
@@ -46,7 +47,7 @@ class Yolov5(IModel):
 
         # initiate basic class attributes
         self._weight = weight
-        self._fp16 = True
+        self._fp16 = fp16
 
         # initiate model specific class attributes
         self._nc = num_classes
