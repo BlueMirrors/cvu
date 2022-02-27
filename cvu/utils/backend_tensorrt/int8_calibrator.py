@@ -15,7 +15,7 @@ from cvu.utils.general import read_images_in_batch
 
 
 class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
-    """Implements trt.IInt8EntropyCalibrator2 for Yolov5.
+    """Implements trt.IInt8EntropyCalibrator2 for CNNs.
     """
     def __init__(
         self,
@@ -37,30 +37,30 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
             calib_cache (str): File to store the calibration cache.
         """
         trt.IInt8EntropyCalibrator2.__init__(self)
-        self.batchsize = batchsize
-        self.input_w = input_w
-        self.input_h = input_h
-        self.img_dir = img_dir
+        self._batchsize = batchsize
+        self._input_w = input_w
+        self._input_h = input_h
+        self._img_dir = img_dir
 
-        self.calib_cache = calib_cache
+        self._calib_cache = calib_cache
 
         # each element of the calibration data is a float32
         # get the larger dim from (h, w)
         input_dim = input_h if input_h > input_w else input_w
-        self.device_input = cuda.mem_alloc(
-            trt.volume((self.batchsize, 3, input_dim, input_dim)) * trt.float32.itemsize
+        self._device_input = cuda.mem_alloc(
+            trt.volume((self._batchsize, 3, input_dim, input_dim)) * trt.float32.itemsize
         )
 
-        self.preprocess = preprocess
+        self._preprocess = preprocess
 
-        self.batches = read_images_in_batch(
-            self.img_dir, self.batchsize, preprocess=self.preprocess
+        self._batches = read_images_in_batch(
+            self._img_dir, self._batchsize, preprocess=self._preprocess
         )
 
     def get_batch_size(self):
         """Get batch size.
         """
-        return self.batchsize
+        return self._batchsize
 
     def get_batch(self, names: List[str]) -> List[int]:    # pylint: disable=unused-argument
         """Get a batch of input for calibration.
@@ -74,9 +74,9 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
             batches for calibration.
         """
         try:
-            data = next(self.batches)
-            cuda.memcpy_htod(self.device_input, data)
-            return [int(self.device_input)]
+            data = next(self._batches)
+            cuda.memcpy_htod(self._device_input, data)
+            return [int(self._device_input)]
         except StopIteration:
             # When we're out of batches, we return either [] or None.
             # This signals to TensorRT that there is no calibration data remaining.
@@ -90,8 +90,8 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         """
         # If there is a cache, use it instead of calibrating again. Otherwise,
         # return None.
-        if os.path.exists(self.calib_cache):
-            with open(self.calib_cache, "rb") as calib_cache_file:
+        if os.path.exists(self._calib_cache):
+            with open(self._calib_cache, "rb") as calib_cache_file:
                 return calib_cache_file.read()
         return None
 
@@ -101,5 +101,5 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         Args:
             cache: The calibration cache to write.
         """
-        with open(self.calib_cache, "wb") as calib_cache_file:
+        with open(self._calib_cache, "wb") as calib_cache_file:
             calib_cache_file.write(cache)
