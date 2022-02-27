@@ -25,6 +25,7 @@ from cvu.utils.backend_tensorrt.int8_calibrator import Int8EntropyCalibrator2
 
 
 class Yolov5(IModel):
+    # noqa # pylint: disable=too-many-instance-attributes
     """Implements IModel for Yolov5 using TensorRT.
 
     This model (tensorrt-backend) performs inference, using TensorRT,
