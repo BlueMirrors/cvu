@@ -15,9 +15,13 @@ import pycuda.autoinit  # noqa # pylint: disable=unused-import
 import pycuda.driver as cuda
 
 from cvu.interface.model import IModel
+from cvu.preprocess.image.letterbox import letterbox
+from cvu.preprocess.image.general import (basic_preprocess, bgr_to_rgb,
+                                          hwc_to_chw)
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
+from cvu.utils.backend_tensorrt.int8_calibrator import Int8EntropyCalibrator2
 
 
 class Yolov5(IModel):
@@ -37,8 +41,9 @@ class Yolov5(IModel):
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
-                 input_shape=None,
-                 fp16: bool = True) -> None:
+                 input_shape = None,
+                 dtype: str = "fp16",
+                 calib_images_dir: str = None) -> None:
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
@@ -47,7 +52,11 @@ class Yolov5(IModel):
 
         # initiate basic class attributes
         self._weight = weight
-        self._fp16 = fp16
+        self._dtype = dtype
+        if self._dtype == "int8":
+            if calib_images_dir is None:
+                raise Exception("[CVU-Error] calib_images_dir is None with dtype int8.")
+            self._calib_images_dir = calib_images_dir
 
         # initiate model specific class attributes
         self._nc = num_classes
@@ -94,7 +103,7 @@ class Yolov5(IModel):
 
             # get path to pretrained weights
             engine_path = get_path(__file__, "weights",
-                                   f"{weight}_{height}_{width}_trt.engine")
+                                   f"{weight}_{height}_{width}_{self._dtype}_trt.engine")
 
             onnx_weight = get_path(__file__, "weights", f"{weight}_trt.onnx")
 
@@ -179,11 +188,31 @@ class Yolov5(IModel):
             builder.max_batch_size = 1
 
             # FP16 quantization
-            if self._fp16:
+            if self._dtype == "fp16":
                 if builder.platform_has_fast_fp16:
                     print("[CVU-Info] Platform has FP16 support.",
                           "Setting fp16 to True")
                     config.flags = 1 << (int)(trt.BuilderFlag.FP16)
+
+            if self._dtype == "int8":
+                if builder.platform_has_fast_int8:
+                    # Activate int8 mode
+                    print("[CVU-Info] Platform has INT8 support.",
+                          "Setting int8 to True")
+                    config.flags = 1 << (int)(trt.BuilderFlag.INT8)
+                    config.int8_calibrator = Int8EntropyCalibrator2(
+                        batchsize=1,
+                        input_h=input_shape[0],
+                        input_w=input_shape[1],
+                        img_dir=self._calib_images_dir,
+                        preprocess=[
+                            letterbox,
+                            bgr_to_rgb,
+                            hwc_to_chw,
+                            np.ascontiguousarray,
+                            basic_preprocess
+                        ]
+                    )
 
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
