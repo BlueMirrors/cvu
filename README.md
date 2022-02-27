@@ -59,7 +59,7 @@ reader = Reader("example.mp4")
 writer = Writer(reader, name="output.mp4")
 
 
-# create detector
+# create detector with tensorrt backend having fp16 precision by default
 detector = Detector(classes="coco", backend="tensorrt")
 
 # process frames
@@ -235,7 +235,7 @@ You can use TensorRT powered detector by specifying the backend parameter.
 
 ```python
 from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "tensorrt"))
+detector = Detector(classes="coco", backend = "tensorrt")
 ```
 
 Internally, the Detector will build TensorRT Cuda-Engine using pretrained ONNX Yolov5s weight file.
@@ -252,6 +252,25 @@ python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
 ```
 
 Now simply set parameter `weight="path_to_custom_weights.onnx"` in Detector initialization, and you're ready for inference.
+
+## INT8 Qunatization
+Besides FP16, TensorRT supports the use of 8-bit integers to represent quantized floating point values. To enable int8 precision while building TensorRT engines pass in the ```dtype="int8"``` which is by default ```"fp16"```.
+
+Similar to test/validation datasets INT8 calibration requires a set of input images as calibration dataset. Make sure the calibration files are representative of the overall inference data files.
+
+For the INT8 calibration of YOLOv5 pretrained on COCO please use [this COCO calibration dataset.](https://drive.google.com/file/d/1VvX1riOUvGYVey76do1frnQ9ao2Zr1Uo/view?usp=sharing).
+
+```python
+from cvu.detector import Detector
+
+detector = Detector(
+    classes="coco", 
+    backend = "tensorrt", 
+    dtype="int8", 
+    calib_images_dir="./coco_calib/"
+)
+```
+
 
 <br>
 Notes
