@@ -258,7 +258,7 @@ Besides FP16, TensorRT supports the use of 8-bit integers to represent quantized
 
 Similar to test/validation datasets INT8 calibration requires a set of input images as calibration dataset. Make sure the calibration files are representative of the overall inference data files.
 
-For the INT8 calibration of YOLOv5 pretrained on COCO please use [this COCO calibration dataset.](https://drive.google.com/file/d/1VvX1riOUvGYVey76do1frnQ9ao2Zr1Uo/view?usp=sharing).
+For the INT8 calibration of YOLOv5 pretrained on COCO please use [this COCO calibration dataset.](https://drive.google.com/file/d/1VvX1riOUvGYVey76do1frnQ9ao2Zr1Uo/view?usp=sharing)
 
 ```python
 from cvu.detector import Detector
