@@ -74,9 +74,7 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
             batches for calibration.
         """
         try:
-            # Assume self.batches is a generator that provides batch data.
             data = next(self.batches)
-            # Assume that self.device_input is a device buffer allocated by the constructor.
             cuda.memcpy_htod(self.device_input, data)
             return [int(self.device_input)]
         except StopIteration:
@@ -91,7 +89,7 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
             A cache object or None if there is no data.
         """
         # If there is a cache, use it instead of calibrating again. Otherwise,
-        # implicitly return None.
+        # return None.
         if os.path.exists(self.calib_cache):
             with open(self.calib_cache, "rb") as calib_cache_file:
                 return calib_cache_file.read()
