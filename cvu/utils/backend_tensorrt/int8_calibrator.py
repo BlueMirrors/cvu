@@ -29,12 +29,12 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         """Initialize Int8EntropyCalibrator2.
 
         Args:
-            batchsize (int): Batchsize for the calibration process.
-            input_h (int): Maximum height of the input for CUDA mem alloc.
-            input_w (int): Maximum width of the input for CUDA mem alloc.
-            img_dir (str): Directory containing calibration images from training dataset.
-            preprocess (List[Callable]): List of preprocessing to apply.
-            calib_cache (str): File to store the calibration cache.
+            batchsize (int): batchsize for the calibration process
+            input_h (int): maximum height of the input for CUDA mem alloc
+            input_w (int): maximum width of the input for CUDA mem alloc
+            img_dir (str): directory containing calibration images from training dataset
+            preprocess (List[Callable]): list of preprocessing to apply
+            calib_cache (str): file to store the calibration cache
         """
         trt.IInt8EntropyCalibrator2.__init__(self)
         self._batchsize = batchsize
@@ -66,12 +66,12 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         """Get a batch of input for calibration.
 
         Args:
-            names: List of file names.
+            names (List[str]): list of file names
 
         Returns:
-            A list of device memory pointers set to the memory containing
+            list of device memory pointers set to the memory containing
             each network input data, or an empty list if there are no more
-            batches for calibration.
+            batches for calibration
         """
         try:
             data = next(self._batches)
@@ -86,7 +86,7 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         """Load a calibration cache.
 
         Returns:
-            A cache object or None if there is no data.
+            a cache object or None if there is no data
         """
         # If there is a cache, use it instead of calibrating again. Otherwise,
         # return None.
@@ -99,7 +99,7 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
         """Save a calibration cache.
 
         Args:
-            cache: The calibration cache to write.
+            cache (memoryview): the calibration cache to write
         """
         with open(self._calib_cache, "wb") as calib_cache_file:
             calib_cache_file.write(cache)

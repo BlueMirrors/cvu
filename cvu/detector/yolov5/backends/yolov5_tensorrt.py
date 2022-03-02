@@ -42,9 +42,18 @@ class Yolov5(IModel):
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
-                 input_shape = None,
+                 input_shape: Tuple[int, int] = None,
                  dtype: str = "fp16",
                  calib_images_dir: str = None) -> None:
+        """Initialize.
+
+        Args:
+            weight (str): name of the weight file
+            num_classes (int): number of classes model is trained with
+            input_shape (Tuple(int, int)): input shape of the model (h, w)
+            dtype (str): dtype ['fp32', 'fp16', 'int8'] for tensorrt model
+            calib_images_dir (str): calibration images directory for when dtype is 'int8'
+        """
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
