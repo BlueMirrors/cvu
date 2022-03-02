@@ -1,0 +1,52 @@
+{
+    "torch": {
+        "package-name": "torch",
+        "import-name": "torch",
+        "best-device": "cuda",
+        "dependencies": ["torchvision"],
+        "version": null,
+        "device-agnostic": true,
+        "args": null,
+        "supported-devices": ["gpu", "cuda", "cpu"]
+    },
+    "tensorflow": {
+        "package-name": "tensorflow",
+        "import-name": "tensorflow",
+        "best-device": "cuda",
+        "dependencies": null,
+        "version": null,
+        "device-agnostic": false,
+        "args": null,
+        "supported-devices": ["gpu", "cuda", "cpu", "tpu"]
+    },
+    "tflite": {
+        "package-name": "tensorflow",
+        "import-name": "tensorflow.lite",
+        "best-device": "cpu",
+        "dependencies": null,
+        "version": null,
+        "device-agnostic": true,
+        "args": null,
+        "supported-devices": ["cpu"]
+    },
+    "onnx": {
+        "package-name": "onnxruntime",
+        "import-name": "onnxruntime",
+        "best-device": "cuda",
+        "dependencies": ["onnx"],
+        "version": null,
+        "device-agnostic": false,
+        "args": null,
+        "supported-devices": ["gpu", "cuda", "cpu"]
+    },
+    "tensorrt": {
+        "package-name": "nvidia-tensorrt",
+        "import-name": "tensorrt",
+        "best-device": "cuda",
+        "dependencies": ["pycuda"],
+        "version": null,
+        "device-agnostic": true,
+        "args": ["--index-url", "https://pypi.ngc.nvidia.com"],
+        "supported-devices": ["gpu", "cuda"]
+    }
+}

@@ -24,7 +24,8 @@ def install(package: str, *args) -> None:
         print(f"[CVU-Error] {package.title()} Auto-Installation Failed...")
 
 
-def setup(package: str,
+def setup(package_name: str,
+          import_name: str,
           device: str,
           dependencies: List[str] = None,
           version: str = None,
@@ -33,7 +34,8 @@ def setup(package: str,
     and test error-free import.
 
     Args:
-        package (str): name of the package to install and test
+        package_name (str): name of the package to install and test
+        import_name (str): name of the module that will be imported
         device (str): name of the device
         dependencies (List[str], optional): name of dependency packages. Defaults to None.
         version (str, optional): specific version. Defaults to None.
@@ -44,7 +46,7 @@ def setup(package: str,
     """
     # check if already installed
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(import_name, device, dependencies)
         return True
 
     # attempt installation
@@ -52,7 +54,7 @@ def setup(package: str,
 
         # add version info if needed
         if version is not None:
-            package = f'{package}=={version}'
+            package_name = f'{package_name}=={version}'
 
         # install dependencies
         if dependencies is not None:
@@ -61,18 +63,18 @@ def setup(package: str,
 
         # pass on pip args if applicable
         if args:
-            install(package, *args)
+            install(package_name, *args)
         else:
-            install(package)
+            install(package_name)
 
     # test if installation was successful
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(import_name, device, dependencies)
         return True
 
     # failed to install properly
     except ModuleNotFoundError:
-        print(f"[CVU-Error] {package.title()} Import Failed, either",
+        print(f"[CVU-Error] {package_name.title()} Import Failed, either",
               "change backend or reinstall it properly...")
 
     return False
@@ -95,9 +97,6 @@ def attempt_import(package: str,
     elif "CUDA_VISIBLE_DEVICES" in os.environ:
         # activate gpu again
         del os.environ["CUDA_VISIBLE_DEVICES"]
-
-    # sanitize (for example tensorflow-gpu => tensorflow)
-    package = package.split('-')[0]
 
     # import dependencies
     if dependencies is not None:

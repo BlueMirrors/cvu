@@ -1,56 +1,11 @@
 """This module handles all the backend installation and setup related tasks.
 """
 import importlib
+
+from cvu.utils.general import (load_json, get_path)
 from .package import setup
 
-SUPPORTED_BACKENDS = {
-    'torch': {
-        'name': 'torch',
-        'best-device': 'cuda',
-        'dependencies': ['torchvision'],
-        'version': None,
-        'device-agnostic': True,
-        'args': None,
-        'supported-devices': ['gpu', 'cuda', 'cpu']
-    },
-    'tensorflow': {
-        'name': 'tensorflow',
-        'best-device': 'cuda',
-        'dependencies': None,
-        'version': None,
-        'device-agnostic': False,
-        'args': None,
-        'supported-devices': ['gpu', 'cuda', 'cpu', 'tpu']
-    },
-    'tflite': {
-        'name': 'tensorflow',
-        'best-device': 'cpu',
-        'dependencies': None,
-        'version': None,
-        'device-agnostic': True,
-        'args': None,
-        'supported-devices': ['cpu']
-    },
-    'onnx': {
-        'name': 'onnxruntime',
-        'best-device': 'cuda',
-        'dependencies': ['onnx'],
-        'version': None,
-        'device-agnostic': False,
-        'args': None,
-        'supported-devices': ['gpu', 'cuda', 'cpu']
-    },
-    'tensorrt': {
-        'name': 'nvidia-tensorrt',
-        'best-device': 'cuda',
-        'dependencies': ['pycuda'],
-        'version': None,
-        'device-agnostic': True,
-        'args': ["--index-url", "https://pypi.ngc.nvidia.com"],
-        'supported-devices': ['gpu', 'cuda']
-    }
-}
-
+SUPPORTED_BACKENDS = load_json(get_path(__file__, "backend_config.json"))
 
 def setup_backend(backend_name: str, device: str = "auto") -> bool:
     """Setup Backend and install dependencies
@@ -74,7 +29,8 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
 
     # get info
     backend = SUPPORTED_BACKENDS[backend_name]
-    package = backend['name']
+    package_name = backend['package-name']
+    import_name = backend['import-name']
 
     # flag to know if mode is auto select device
     auto_selected_device = False
@@ -91,10 +47,11 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
 
     # update package name if needed (for example tensorflow vs tensorflow-gpu)
     if device not in ("cpu", "tpu") and not backend['device-agnostic']:
-        package += "-gpu"
+        package_name += "-gpu"
 
     # attempt to install best option (possibly only option for some backends)
-    success = setup(package=package,
+    success = setup(package_name=package_name,
+                    import_name=import_name,
                     device=device,
                     dependencies=backend['dependencies'],
                     version=backend["version"],
@@ -103,8 +60,9 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
     # if best option failed, attempt to install other options if available
     # only applicable in auto-select mode
     if not success and auto_selected_device and not backend['device-agnostic']:
-        package = package.split('-')[0]
-        success = setup(package=package,
+        package_name = package_name.split('-')[0]
+        success = setup(package_name=package_name,
+                        import_name=import_name,
                         device=device,
                         dependencies=backend['dependencies'],
                         version=backend["version"],
