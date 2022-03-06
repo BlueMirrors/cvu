@@ -160,7 +160,7 @@ class Yolov5(IModel):
 
         Args:
             builder (trt.Bilder): a trt.Builder object
-        
+
         Returns:
             list of suuported dtypes
         """
@@ -221,17 +221,17 @@ class Yolov5(IModel):
             config = builder.create_builder_config()
             config.max_workspace_size = 64 * 1 << 20  # 64 MB
             builder.max_batch_size = 1
-            
+
             print(f"[CVU-Info] Platform has {self._dtype} support.",\
                   f"Setting {self._dtype} to True")
             # fp16 quantization
             if self._dtype == "fp16":
                 config.flags = 1 << (int)(trt.BuilderFlag.FP16)
-            
+
             # int8 qunatization
             elif self._dtype == "int8":
                 # Activate int8 mode
-                
+
                 config.flags = 1 << (int)(trt.BuilderFlag.INT8)
                 config.int8_calibrator = Int8EntropyCalibrator2(
                     batchsize=1,
@@ -246,11 +246,12 @@ class Yolov5(IModel):
                         basic_preprocess
                     ]
                 )
-            else: 
+            else:
                 for dtype in supported_dtypes:
-                    if dtype == 'fp32': continue
+                    if dtype == 'fp32':
+                        continue
                     print(f"[CVU-Info] Platform has {dtype} support. Select dtype '{dtype}'")
-                
+
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
                 if not parser.parse(onnx_file.read()):
