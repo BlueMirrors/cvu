@@ -152,8 +152,27 @@ class Yolov5(IModel):
         self._context = self._engine.create_execution_context()
         if not self._context:
             raise Exception(
-                "[CVU-Error] Couldn't create execution context from engine successfully !"
-            )
+                "[CVU-Error] Couldn't create execution context from engine successfully !")
+
+    @staticmethod
+    def get_supported_dtypes(builder) -> List[str]:
+        """Method to check if fp16 and int8 are suuported on the platform.
+
+        Args:
+            builder (trt.Bilder): a trt.Builder object
+        
+        Returns:
+            list of suuported dtypes
+        """
+        supported_dtypes = ["fp32"]
+
+        if builder.platform_has_fast_fp16:
+            supported_dtypes.append("fp16")
+
+        if builder.platform_has_fast_int8:
+            supported_dtypes.append("int8")
+        return supported_dtypes
+
 
     def _build_engine(self, onnx_weight: str, trt_engine_path: str,
                       input_shape: Tuple[int]) -> trt.tensorrt.ICudaEngine:
@@ -192,38 +211,46 @@ class Yolov5(IModel):
              builder.create_network(batch_size) as network, \
              trt.OnnxParser(network, self._logger) as parser:
 
+            # get supported dtypes on this platform
+            supported_dtypes = Yolov5.get_supported_dtypes(builder)
+            if self._dtype not in supported_dtypes:
+                raise Exception(f"[CVU-Error] Invalid dtype '{self._dtype}'. "\
+                    f"Please choose from {str(supported_dtypes)}")
+
             # setup builder config
             config = builder.create_builder_config()
             config.max_workspace_size = 64 * 1 << 20  # 64 MB
             builder.max_batch_size = 1
-
-            # FP16 quantization
+            
+            print(f"[CVU-Info] Platform has {self._dtype} support.",\
+                  f"Setting {self._dtype} to True")
+            # fp16 quantization
             if self._dtype == "fp16":
-                if builder.platform_has_fast_fp16:
-                    print("[CVU-Info] Platform has FP16 support.",
-                          "Setting fp16 to True")
-                    config.flags = 1 << (int)(trt.BuilderFlag.FP16)
-
-            if self._dtype == "int8":
-                if builder.platform_has_fast_int8:
-                    # Activate int8 mode
-                    print("[CVU-Info] Platform has INT8 support.",
-                          "Setting int8 to True")
-                    config.flags = 1 << (int)(trt.BuilderFlag.INT8)
-                    config.int8_calibrator = Int8EntropyCalibrator2(
-                        batchsize=1,
-                        input_h=input_shape[0],
-                        input_w=input_shape[1],
-                        img_dir=self._calib_images_dir,
-                        preprocess=[
-                            letterbox,
-                            bgr_to_rgb,
-                            hwc_to_chw,
-                            np.ascontiguousarray,
-                            basic_preprocess
-                        ]
-                    )
-
+                config.flags = 1 << (int)(trt.BuilderFlag.FP16)
+            
+            # int8 qunatization
+            elif self._dtype == "int8":
+                # Activate int8 mode
+                
+                config.flags = 1 << (int)(trt.BuilderFlag.INT8)
+                config.int8_calibrator = Int8EntropyCalibrator2(
+                    batchsize=1,
+                    input_h=input_shape[0],
+                    input_w=input_shape[1],
+                    img_dir=self._calib_images_dir,
+                    preprocess=[
+                        letterbox,
+                        bgr_to_rgb,
+                        hwc_to_chw,
+                        np.ascontiguousarray,
+                        basic_preprocess
+                    ]
+                )
+            else: 
+                for dtype in supported_dtypes:
+                    if dtype == 'fp32': continue
+                    print(f"[CVU-Info] Platform has {dtype} support. Select dtype '{dtype}'")
+                
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
                 if not parser.parse(onnx_file.read()):

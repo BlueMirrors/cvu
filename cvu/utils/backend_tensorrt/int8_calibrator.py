@@ -57,12 +57,12 @@ class Int8EntropyCalibrator2(trt.IInt8EntropyCalibrator2):
             self._img_dir, self._batchsize, preprocess=self._preprocess
         )
 
-    def get_batch_size(self):
+    def get_batch_size(self) -> int:
         """Get batch size.
         """
         return self._batchsize
 
-    def get_batch(self, names: List[str]) -> List[int]:    # pylint: disable=unused-argument
+    def get_batch(self, names: List[str]) -> Union[List[int], None]:    # pylint: disable=unused-argument
         """Get a batch of input for calibration.
 
         Args:
