@@ -246,11 +246,6 @@ class Yolov5(IModel):
                         basic_preprocess
                     ]
                 )
-            else:
-                for dtype in supported_dtypes:
-                    if dtype == 'fp32':
-                        continue
-                    print(f"[CVU-Info] Platform has {dtype} support. Select dtype '{dtype}'")
 
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
