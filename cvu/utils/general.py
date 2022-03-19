@@ -4,6 +4,10 @@ and resolving paths.
 import os
 import json
 import zipfile
+from typing import Any, Iterable, List, Callable
+
+import numpy as np
+import cv2
 
 
 def get_local_path(fname: str) -> str:
@@ -86,3 +90,50 @@ def unzip_file(filepath: str,
     if clean_up:
         os.remove(filepath)
     return True
+
+
+def read_images_in_batch(img_dir, batchsize, preprocess=None) -> Iterable[np.ndarray]:
+    """
+    Read preprocessed image files in a batch.
+
+    Args:
+        img_dir (str): Path to the directory containing the images.
+
+    Yields:
+        np.ndarray: Batch of preprocessed images.
+    """
+    img_files = [os.path.join(img_dir, f) for f in os.listdir(img_dir)]
+
+    batch = []
+    for img_file in  img_files:
+        if len(batch) == batchsize:
+            yield np.array(batch).squeeze(0)
+            batch = []
+
+        # Read image.
+        image = cv2.imread(img_file)
+
+        # Preprocess
+        if preprocess:
+            image = apply(image, preprocess)
+        batch.append(image)
+    yield np.array(batch)
+
+
+def apply(
+        value: Any,
+        functions: List[Callable[[Any], Any]]) -> Any:
+    """
+    Recursively applies list of callable functions to given value
+
+    Args:
+        value (Any): Input to be processed.
+        functions (List[Callable[[Any], Any]]): List of
+        callable functions.
+
+    Returns:
+        Any: Value resulting from applying all functions.
+    """
+    for func in functions:
+        value = func(value)
+    return value

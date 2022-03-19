@@ -15,12 +15,17 @@ import pycuda.autoinit  # noqa # pylint: disable=unused-import
 import pycuda.driver as cuda
 
 from cvu.interface.model import IModel
+from cvu.preprocess.image.letterbox import letterbox
+from cvu.preprocess.image.general import (basic_preprocess, bgr_to_rgb,
+                                          hwc_to_chw)
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
+from cvu.utils.backend_tensorrt.int8_calibrator import Int8EntropyCalibrator2
 
 
 class Yolov5(IModel):
+    # noqa # pylint: disable=too-many-instance-attributes
     """Implements IModel for Yolov5 using TensorRT.
 
     This model (tensorrt-backend) performs inference, using TensorRT,
@@ -37,8 +42,18 @@ class Yolov5(IModel):
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
-                 input_shape=None,
-                 fp16: bool = True) -> None:
+                 input_shape: Tuple[int, int] = None,
+                 dtype: str = "fp16",
+                 calib_images_dir: str = None) -> None:
+        """Initialize.
+
+        Args:
+            weight (str): name of the weight file
+            num_classes (int): number of classes model is trained with
+            input_shape (Tuple(int, int)): input shape of the model (h, w)
+            dtype (str): dtype ['fp32', 'fp16', 'int8'] for tensorrt model
+            calib_images_dir (str): calibration images directory for when dtype is 'int8'
+        """
 
         # Create a Context on this device,
         self._ctx = cuda.Device(0).make_context()
@@ -47,7 +62,11 @@ class Yolov5(IModel):
 
         # initiate basic class attributes
         self._weight = weight
-        self._fp16 = fp16
+        self._dtype = dtype
+        if self._dtype == "int8":
+            if calib_images_dir is None:
+                raise Exception("[CVU-Error] calib_images_dir is None with dtype int8.")
+            self._calib_images_dir = calib_images_dir
 
         # initiate model specific class attributes
         self._nc = num_classes
@@ -94,7 +113,7 @@ class Yolov5(IModel):
 
             # get path to pretrained weights
             engine_path = get_path(__file__, "weights",
-                                   f"{weight}_{height}_{width}_trt.engine")
+                                   f"{weight}_{height}_{width}_{self._dtype}_trt.engine")
 
             onnx_weight = get_path(__file__, "weights", f"{weight}_trt.onnx")
 
@@ -133,8 +152,27 @@ class Yolov5(IModel):
         self._context = self._engine.create_execution_context()
         if not self._context:
             raise Exception(
-                "[CVU-Error] Couldn't create execution context from engine successfully !"
-            )
+                "[CVU-Error] Couldn't create execution context from engine successfully !")
+
+    @staticmethod
+    def get_supported_dtypes(builder) -> List[str]:
+        """Method to check if fp16 and int8 are suuported on the platform.
+
+        Args:
+            builder (trt.Bilder): a trt.Builder object
+
+        Returns:
+            list of suuported dtypes
+        """
+        supported_dtypes = ["fp32"]
+
+        if builder.platform_has_fast_fp16:
+            supported_dtypes.append("fp16")
+
+        if builder.platform_has_fast_int8:
+            supported_dtypes.append("int8")
+        return supported_dtypes
+
 
     def _build_engine(self, onnx_weight: str, trt_engine_path: str,
                       input_shape: Tuple[int]) -> trt.tensorrt.ICudaEngine:
@@ -173,17 +211,41 @@ class Yolov5(IModel):
              builder.create_network(batch_size) as network, \
              trt.OnnxParser(network, self._logger) as parser:
 
+            # get supported dtypes on this platform
+            supported_dtypes = Yolov5.get_supported_dtypes(builder)
+            if self._dtype not in supported_dtypes:
+                raise Exception(f"[CVU-Error] Invalid dtype '{self._dtype}'. "\
+                    f"Please choose from {str(supported_dtypes)}")
+
             # setup builder config
             config = builder.create_builder_config()
             config.max_workspace_size = 64 * 1 << 20  # 64 MB
             builder.max_batch_size = 1
 
-            # FP16 quantization
-            if self._fp16:
-                if builder.platform_has_fast_fp16:
-                    print("[CVU-Info] Platform has FP16 support.",
-                          "Setting fp16 to True")
-                    config.flags = 1 << (int)(trt.BuilderFlag.FP16)
+            print(f"[CVU-Info] Platform has {self._dtype} support.",\
+                  f"Setting {self._dtype} to True")
+            # fp16 quantization
+            if self._dtype == "fp16":
+                config.flags = 1 << (int)(trt.BuilderFlag.FP16)
+
+            # int8 qunatization
+            elif self._dtype == "int8":
+                # Activate int8 mode
+
+                config.flags = 1 << (int)(trt.BuilderFlag.INT8)
+                config.int8_calibrator = Int8EntropyCalibrator2(
+                    batchsize=1,
+                    input_h=input_shape[0],
+                    input_w=input_shape[1],
+                    img_dir=self._calib_images_dir,
+                    preprocess=[
+                        letterbox,
+                        bgr_to_rgb,
+                        hwc_to_chw,
+                        np.ascontiguousarray,
+                        basic_preprocess
+                    ]
+                )
 
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
