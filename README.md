@@ -5,29 +5,30 @@
 
 
 <br>
+Computer Vision deployment tools for dummies and experts.<br><br>
+Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the expert and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br><br>
 
-Computer Vision deployment tools for dummies and experts.<br>
+
 
 ```bash
 pip install cvu-python
 ```
 
-<br>
 
 # Index 📋
 
 - [Getting Started](#cvu--says-hi) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
-- [What and why is CVU?](#why-cvu-)
-- [Object Detection (YOLOv5)](#object-detection-yolov5) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
-  - [TensorRT](#tensorrt)
-  - [Torch](#torch)
-  - [ONNX](#onnx)
-  - [TensorFlow](#tensorflow)
-  - [TFLite](#tflite)
+- [What and why is CVU?](https://github.com/BlueMirrors/cvu/wiki)
+- [Object Detection (YOLOv5)](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-object-detection) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
+  - [TensorRT](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-TensorRT)
+  - [Torch](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-Torch)
+  - [ONNX](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-ONNX)
+  - [TensorFlow](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-TensorFlow)
+  - [TFLite](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-TFLite)
 - [Devices (CPU, GPU, TPU)](#devices)
-- [Benchmark-Tool (YOLOv5)](#benchmarks-yolov5)
-- [Benchmarks Results (YOLOv5)](#yolov5-benchmark-results)
-- [Precission Accuracy (YOLOv5)](#precission-accuracy-yolov5))
+- [Benchmark-Tool (YOLOv5)](https://github.com/BlueMirrors/cvu/wiki/Benchmark-tool)
+- [Benchmarks Results (YOLOv5)](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-benchmarking)
+- [Precission Accuracy (YOLOv5)](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-object-detection#precission-accuracy-yolov5)
 - [Examples](https://github.com/BlueMirrors/cvu/tree/master/examples)
 - [References](#references)
 
@@ -37,9 +38,8 @@ pip install cvu-python
 
 [Index](#index-)
 
-Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the expert and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br>
 
-For example, how much installation-steps and code will you need to run object detection on a video with a TensorRT backend? How complicated is it be to test that pipeline in Colab?<br><br>
+How much installation-steps and code will you need to run object detection on a video with a TensorRT backend? How complicated is it be to test that pipeline in Colab?<br><br>
 
 With CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12">, you just need the following! No extra installation steps needed to run on Colab, just pip install our tool, and you're all set to go!<br>
 
@@ -109,276 +109,8 @@ detector = Detector(classes="coco", backend="tensorflow", device="tpu")
 ```
 
 You can change devices, platforms and backends as much as you want, without having to change your pipeline.
-<br><br>
-
-# Why CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="25">?
-
-[Index](#index-)
-
-There are countless amazing open-source state-of-the-art Computer Vision models that are pushing Computer Vision ahead every moment. But many of them are either too complicated or hard to use in deployment scenarios or to integrate in simple projects.
-
-CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can handle all the Computer vision related stuff (even installation of the required frameworks/libraries in most cases), while you can focus on building awesome projects!!
-
-We are working to optimize open source state-of-the-art models for various CV use cases, and aim to make them more accessible and available to everyone!
-<br> <br>
-
-# Object Detection (YOLOv5)
-
-[Index](#index-)
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "torch",
-                    weight = "yolov5s", device = "auto"))
-```
-
-Detector Arguments
-
-- `classes (Union[str, List[str]])`: name of classes to be detected.
-  It can be set to individual classes like 'coco', 'person', 'cat' etc.
-  Alternatively, it also accepts list of classes such as ['person', 'cat'].
-  For default models/weights, 'classes' is used to filter out objects
-  according to provided argument from coco class. For custom models, all
-  classes should be provided in original order as list of strings.
-
-- `backend (str, optional)`: name of the backend to be used for inference purposes.
-  Defaults to "torch".
-
-- `weight (str, optional)`: path to weight files (according to selected backend).
-  Alternatively, it also accepts identifiers (such as yolvo5s, yolov5m, etc.)
-  to load pretrained models. Defaults to "yolov5s".
-
-- `device (str, optional)`: name of the device to be used. Valid
-  devices can be "cpu", "gpu", "cuda", "tpu", "auto". Defaults to "auto" which tries
-  to use the device best suited for selected backend and the hardware avaibility.
 
 <br>
-
-Every object detector expects BGR formatted single image (batching is not supported yet), and returns a [Predictions](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/predictions.py) object which represents a group/list of detected objects. You can access individual detections using indexing or looping through [Predictions](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/predictions.py). A single detection is represented by [Prediction](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/prediction.py).
-
-```python
-import cv2
-from cvu.detector import Detector
-
-# read image, initiate detector
-img = cv2.imread("example.jpg")
-detector = Detector(classes="coco")
-
-# inference
-predictions = detector(img)
-
-# predictions info
-print(predictions)
-
-# draw on frame (inplace + returns img)
-predictions.draw(img)
-
-# class-wise counter object
-print(predictions.count())
-
-# loop through
-for prediction in predictions:
-    # print info
-    print(prediction)
-
-    # access specific things
-    print(prediction.bbox, prediction.confidence)
-    print(prediction.class_id, prediction.class_name)
-
-    # draw specific prediction (only inplace, doesn't return img)
-    prediction.draw(img)
-
-# save img
-cv2.imwrite("output.jpg", img)
-```
-
-These wrappers around detections provides various functionalities for drawing boxes, accessing detection info (individually as well as a group). And they implement CVU's common [predictions interface](https://github.com/BlueMirrors/cvu/blob/master/cvu/interface/predictions.py) for consistency.
-
-<br>
-
-Every Object detector is implemented in `cvu.detector`, following a common [interface](https://github.com/BlueMirrors/cvu/blob/master/cvu/interface/core.py).
-
-As of our first alpha release, we only support `Yolov5s` models.
-
-<br>
-
-# YOLOv5
-
-[Index](#index-)
-
-[YOLOv5](https://github.com/BlueMirrors/cvu/blob/master/cvu/detector/yolov5/core.py) is one of the state-of-the-art Object Detection models. Please check out more about it and train your own custom models through it's [official repo](https://github.com/ultralytics/yolov5). CVU also supports custom weights for all the backends.
-
-Checkout following backends for more specific information
-
-- [TensorRT (NVIDIA-GPU)](#tensorrt)
-- [ONNX (GPU, CPU)](#onnx)
-- [Torch (GPU, CPU)](#torch)
-- [TensorFlow (GPU, CPU, TPU)](#tensorflow)
-- [TFLite (CPU)](#tflite)
-
-<br>
-
-# TensorRT
-
-[Index](#index-)
-
-(Only supported for NVIDIA-GPUs, Tested on Linux Devices, Partial Dynamic Support)
-
-You can use TensorRT powered detector by specifying the backend parameter.
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "tensorrt")
-```
-
-Internally, the Detector will build TensorRT Cuda-Engine using pretrained ONNX Yolov5s weight file.
-
-If you want to run the detector for your custom weights, simply do the following:
-
-- [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
-- [Export Weights PyTorch weights to ONNX](https://github.com/ultralytics/yolov5/blob/master/export.py)
-
-Make sure you use the `---dynamic` flag while exporting your custom weights.
-
-```bash
-python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
-```
-
-Now simply set parameter `weight="path_to_custom_weights.onnx"` in Detector initialization, and you're ready for inference.
-
-## INT8 Qunatization
-Besides FP16, TensorRT supports the use of 8-bit integers to represent quantized floating point values. To enable int8 precision while building TensorRT engines pass in the ```dtype="int8"``` which is by default ```"fp16"```.
-
-Similar to test/validation datasets INT8 calibration requires a set of input images as calibration dataset. Make sure the calibration files are representative of the overall inference data files.
-
-For the INT8 calibration of YOLOv5 pretrained on COCO please use [this COCO calibration dataset.](https://drive.google.com/file/d/1VvX1riOUvGYVey76do1frnQ9ao2Zr1Uo/view?usp=sharing)
-
-```python
-from cvu.detector import Detector
-
-detector = Detector(
-    classes="coco", 
-    backend = "tensorrt", 
-    dtype="int8", 
-    calib_images_dir="./coco_calib/"
-)
-```
-
-
-<br>
-Notes
-
-- Unlike other backends, TensorRT backend is not fully dynamic (for optimization reasons). You can initiate Detector and inference on any shape of image and it'll setup engine's input shape to the first input's shape. To run inference on a different shaped image, you'll have to create new detector.
-
-- Building TensorRT Engine and first inference can take sometime to complete (specially if it also has to install all the dependecies for the first time).
-
-- A new engine is built for an unseen input shape. But once built, engine file is cached and used for future inference.
-
-<br><br>
-
-# Torch
-
-[Index](#index-)
-
-(Supports every device and platform except TPU, Full Dynamic Support)
-
-You can use Torch powered detector by specifying the backend parameter.
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "torch"))
-```
-
-Internally, the Detector will load Torchscript (JIT) pretrained Yolov5s weight model.
-
-If you want to run the detector for your custom weights, simply do the following:
-
-- [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
-- [Export Weights PyTorch weights to TorchScript](https://github.com/ultralytics/yolov5/blob/master/export.py)
-
-Make sure your model is on the correct device (CUDA can save torchscript in Float16 format which is unavailable/inefficient in many CPUs) while exporting your custom weights. It's recommended to add `--half` flag for CUDA.
-
-```bash
-python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --include torchscript
-```
-
-Now simply set parameter `weight="path_to_custom_weights.pt` in the Detector initialization, and you're ready for inference.
-
-<br><br>
-
-# ONNX
-
-[Index](#index-)
-
-(Supports every device and platform except TPU, Full Dynamic Support)
-
-You can use ONNX powered detector by specifying the backend parameter.
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "onnx"))
-```
-
-Internally, the Detector will load ONNX pretrained Yolov5s weight model.
-
-If you want to run the detector for your custom weights, simply do the following:
-
-- [Train Yolov5 on your custom dataset](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data)
-- [Export Weights PyTorch weights to ONNX](https://github.com/ultralytics/yolov5/blob/master/export.py)
-
-Make sure you use the `---dynamic` flag while exporting your custom weights.
-
-```bash
-python export.py --weights $PATH_TO_PYTORCH_WEIGHTS --dynamic --include onnx
-```
-
-Now simply set parameter `weight="path_to_custom_weights.onnx` in the Detector initialization, and you're ready for inference.
-
-<br><br>
-
-# TFLite
-
-[Index](#index-)
-
-(Supports CPU on every platform, Full Dynamic Support)
-
-You can use TFLite powered detector by specifying the backend parameter.
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "tflite"))
-```
-
-Internally, the Detector will load TFLite pretrained Yolov5s weight model.
-
-We will update dynamic export info soon, please check back again.
-
-<br>
-
-Notes
-
-- We currently use `tf.lite` for Interpreter creation. In next update, we'll provide option of `tflite_runtime` and `pycoral`
-
-<br><br>
-
-# Tensorflow
-
-[Index](#index-)
-
-(Supports every device on every platform including TPU, Full Dynamic Support)
-
-You can use TensorFlow powered detector by specifying the backend parameter.
-
-```python
-from cvu.detector import Detector
-detector = Detector(classes="coco", backend = "tensorflow"))
-```
-
-Internally, the Detector will load Tensorflow SavedModel pretrained Yolov5s weight model. You can also set `device='tpu'` (tested on colab)
-
-We will update dynamic export info soon, please check back again.
-
-<br><br>
 
 # Devices
 
@@ -405,117 +137,6 @@ Based on FPS performance and various benchmarks
 - TPU: `TensorFlow`
 
 <br><br>
-
-# Benchmarks (Yolov5)
-
-[Index](#index-)
-
-You can run your own benchmarks using our [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/benchmark.py)
-
-Run Benchmark over all supported backends for GPU/CPU/TPU (without and without read/write overhead)
-
-```bash
-python benchmark.py -device $DEVICE_NAME
-```
-
-Alternatively you can benchmark specific backend on specifc device, with specific benchmark settings.
-
-```bash
-python benchmark.py -device $DEVICE_NAME -backend $BACKEND_NAME -warmups $WARMUP_ITERATIONS -iterations $ITERATIONS_COUNT
-```
-
-Checkout [Benchmarker](https://github.com/BlueMirrors/cvu/blob/master/examples/benchmark.py) for more information about all available command line arguments.
-
-<br>
-
-# YOLOv5 Benchmark Results
-
-[Index](#index-)
-
-## GPU (Colab-NVIDIA T4)
-
-Based on 5000 inference iterations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
-
-| Backend    | FPS     |
-| ---------- | ------- |
-| TensorRT   | 157-165 |
-| Torch      | 150-155 |
-| ONNX       | 92-96   |
-| TensorFlow | 43-47   |
-
-<br>
-
-## GPU (Colab-NVIDIA P4)
-
-Based on 5000 inference iterations after 50 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
-
-| Backend    | FPS   |
-| ---------- | ----- |
-| TensorRT   | 82-86 |
-| Torch      | 65-69 |
-| ONNX       | 62-66 |
-| TensorFlow | 39-42 |
-
-<br>
-
-## CPU (Colab)
-
-Note: We are performing more benchmarks, we will update info later on.
-
-Based on 500 inference iterations after 10 iterations of warmups. Includes Image Preprocessing (letterboxing etc.), Model Inference and Output Postprocessing (NMS, Scale-Coords, etc.) time.
-
-| Backend    | FPS     |
-| ---------- | ------- |
-| ONNX       | 5.4-7.6 |
-| TFLite     | 4.0-5.1 |
-| TensorFlow | 3.5-4.2 |
-| Torch      | 3.2-4.0 |
-
-<br><br>
-
-# Precission Accuracy (Yolov5)
-
-[Index](#index-)
-
-For a successful deployment, precission is also important (i.e. closness to results of native-framework of trained weights). We will add more numerical results soon, for now we provide image comparison.
-
-## Torch
-
-<details open>
-<img src="static/zidane_out_torch.jpg">
-<img src="static/bus_out_torch.jpg">
-</details>
-
-<br>
-
-## ONNX
-
-<details close>
-<img src="static/zidane_out_onnx.jpg">
-<img src="static/bus_out_onnx.jpg">
-</details>
-
-<br>
-
-## TensorFlow
-
-<details close>
-<img src="static/zidane_out_tensorflow.jpg">
-<img src="static/bus_out_tensorflow.jpg">
-</details>
-
-<br>
-
-## TFLite
-
-<details close>
-<img src="static/zidane_out_tflite.jpg">
-<img src="static/bus_out_tflite.jpg">
-</details>
-
-<br>
-
-<br>
 
 # References
 
