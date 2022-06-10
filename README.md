@@ -39,7 +39,7 @@ pip install cvu-python
 [Index](#index-)
 
 
-How much installation-steps and code will you need to run object detection on a video with a TensorRT backend? How complicated is it be to test that pipeline in Colab?<br><br>
+How many installation-steps and lines of code will you need to run object detection on a video with a TensorRT backend? How complicated is it be to test that pipeline in Colab?<br><br>
 
 With CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12">, you just need the following! No extra installation steps needed to run on Colab, just pip install our tool, and you're all set to go!<br>
 
