@@ -47,9 +47,11 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
                 module = importlib.import_module(f".setup_{backend_name}",
                                          "cvu.utils.backend")
                 if not module.is_gpu_available():
+                    print(f"[CVU-WARNING] GPU not detected")
                     continue
+            print(f"[CVU-INFO] Using backend {backend_name}-{target_device}")
             return target_device
-        print(f"[CVU-WARNNING] Failed to setup {backend_name} for {target_device} device")
+        print(f"[CVU-WARNING] Failed to setup {backend_name} for {target_device} device")
     
     print(f"[CVU-ERROR] Failed to setup {backend_name}. Please try to install it manually or choose different backend configuration.")
     return None
