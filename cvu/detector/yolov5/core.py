@@ -56,7 +56,7 @@ class Yolov5(ICore):
             to load pretrained models. Defaults to "yolov5s".
 
             device (str, optional): name of the device to be used. Valid
-            devices can be "cpu", "gpu", "cuda", "tpu", "auto". Defaults to "auto" which tries
+            devices can be "cpu", "gpu", "tpu", "auto". Defaults to "auto" which tries
             to use the device best suited for selected backend and the hardware avaibility.
 
             auto_install (bool, optional): auto install missing requirements for the selected
@@ -160,7 +160,7 @@ class Yolov5(ICore):
         Args:
             backend_name (str): name of the backend
             weight (str): path to weight file or default identifiers
-            device (str): name of target device (auto, cpu, gpu, cuda, tpu)
+            device (str): name of target device (auto, cpu, gpu, tpu)
         """
         # load model
         backend = import_module(f".yolov5_{backend_name}", self._BACKEND_PKG)
