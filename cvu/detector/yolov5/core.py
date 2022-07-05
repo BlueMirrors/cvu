@@ -36,7 +36,7 @@ class Yolov5(ICore):
                  backend: str = "torch",
                  weight: str = "yolov5s",
                  device: str = "auto",
-                 auto_install: bool = True,
+                 auto_install: bool = False,
                  **kwargs: Any) -> None:
         """Initiate Yolov5 Object Detector
 
