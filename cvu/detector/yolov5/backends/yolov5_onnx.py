@@ -67,10 +67,17 @@ class Yolov5(IModel):
             self._model = onnxruntime.InferenceSession(
                 weight, providers=["CPUExecutionProvider"])
             return
+        
+        elif self._device == "gpu":
+            # load model on gpu
+            self._model = onnxruntime.InferenceSession(
+                weight, providers=['CUDAExecutionProvider'])
+            return
 
-        # load-model using gpu runtime
+        # load-model with auto-device selection
         try:
-            self._model = onnxruntime.InferenceSession(weight, None)
+            self._model = onnxruntime.InferenceSession(
+                weight, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 
         # failed to load model, try CPU runtime if applicable
         except RuntimeError as error:
@@ -80,7 +87,7 @@ class Yolov5(IModel):
 
             # try cpu device if multiple providers are available,
             # and device selection is set to auto
-            if multiple_providers and self._device == "auto":
+            if multiple_providers:
 
                 print("[CVU-Info] CUDA powered Backend failed to load,",
                       "switching to CPU.")
