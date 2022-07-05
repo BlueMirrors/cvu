@@ -1,52 +1,103 @@
 {
     "torch": {
-        "package-name": "torch",
-        "import-name": "torch",
-        "best-device": "cuda",
-        "dependencies": ["torchvision"],
-        "version": null,
-        "device-agnostic": true,
-        "args": null,
-        "supported-devices": ["gpu", "cuda", "cpu"]
+        "device_configs":{
+            "cpu":{
+                "package_name": "torch",
+                "import_name": "torch",
+                "version": null,
+                "args": null,
+                "dependencies": ["torchvision"]
+            },
+    
+            "gpu":{
+                "package_name": "torch",
+                "import_name": "torch",
+                "version": null,
+                "args": null,
+                "dependencies": ["torchvision"]
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
     },
+
     "tensorflow": {
-        "package-name": "tensorflow",
-        "import-name": "tensorflow",
-        "best-device": "cuda",
-        "dependencies": null,
-        "version": null,
-        "device-agnostic": false,
-        "args": null,
-        "supported-devices": ["gpu", "cuda", "cpu", "tpu"]
+        "device_configs":{
+            "cpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            },
+
+            "gpu":{
+                "package_name": "tensorflow-gpu",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            },
+
+            "tpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
     },
+
     "tflite": {
-        "package-name": "tensorflow",
-        "import-name": "tensorflow.lite",
-        "best-device": "cpu",
-        "dependencies": null,
-        "version": null,
-        "device-agnostic": true,
-        "args": null,
-        "supported-devices": ["cpu"]
+        "device_configs":{
+            "cpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow.lite",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            }
+        },
+
+        "auto_device_priority": ["cpu"]
     },
+
     "onnx": {
-        "package-name": "onnxruntime",
-        "import-name": "onnxruntime",
-        "best-device": "cuda",
-        "dependencies": ["onnx"],
-        "version": null,
-        "device-agnostic": false,
-        "args": null,
-        "supported-devices": ["gpu", "cuda", "cpu"]
+        "device_configs":{
+            "cpu":{
+                "package_name": "onnxruntime",
+                "import_name": "onnxruntime",
+                "version": null,
+                "args": null,
+                "dependencies": ["onnx"]
+            },
+
+            "gpu":{
+                "package_name": "onnxruntime-gpu",
+                "import_name": "onnxruntime",
+                "version": null,
+                "args": null,
+                "dependencies": ["onnx"]
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
     },
+
     "tensorrt": {
-        "package-name": "nvidia-tensorrt",
-        "import-name": "tensorrt",
-        "best-device": "cuda",
-        "dependencies": ["pycuda"],
-        "version": null,
-        "device-agnostic": true,
-        "args": ["--index-url", "https://pypi.ngc.nvidia.com"],
-        "supported-devices": ["gpu", "cuda"]
+        "device_configs":{
+            "gpu":{
+                "package_name": "nvidia-tensorrt",
+                "import_name": "tensorrt",
+                "version": null,
+                "args": ["--index-url", "https://pypi.ngc.nvidia.com"],
+                "dependencies": ["pycuda"]
+            }
+        },
+
+        "auto_device_priority": ["gpu"]
     }
 }

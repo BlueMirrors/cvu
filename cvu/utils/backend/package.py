@@ -24,29 +24,27 @@ def install(package: str, *args) -> None:
         print(f"[CVU-Error] {package.title()} Auto-Installation Failed...")
 
 
-def setup(package_name: str,
+def setup_package(package_name: str,
           import_name: str,
-          device: str,
-          dependencies: List[str] = None,
           version: str = None,
-          args: List[str] = None) -> bool:
+          args: List[str] = None,
+          dependencies: List[str] = None) -> bool:
     """Install package and relevant dependencies if not already installed,
     and test error-free import.
 
     Args:
         package_name (str): name of the package to install and test
         import_name (str): name of the module that will be imported
-        device (str): name of the device
-        dependencies (List[str], optional): name of dependency packages. Defaults to None.
         version (str, optional): specific version. Defaults to None.
         args (List[str], optional): specific pip install arguments. Defaults to None.
+        dependencies (List[str], optional): name of dependency packages. Defaults to None.
 
     Returns:
         bool: True if install and test ran successfully, False otherwise
     """
     # check if already installed
     try:
-        attempt_import(import_name, device, dependencies)
+        attempt_import(import_name, dependencies)
         return True
 
     # attempt installation
@@ -69,7 +67,7 @@ def setup(package_name: str,
 
     # test if installation was successful
     try:
-        attempt_import(import_name, device, dependencies)
+        attempt_import(import_name, dependencies)
         return True
 
     # failed to install properly
@@ -81,23 +79,13 @@ def setup(package_name: str,
 
 
 def attempt_import(package: str,
-                   device: str,
                    dependencies: List[str] = None) -> None:
     """Imports the package and all given dependencies
 
     Args:
         package (str): package to import
-        device (str): name of the device
         dependencies (List[str], optional): name of dependency packages. Defaults to None.
     """
-    if device in ("cpu", "tpu"):
-        # disable GPUs explicitly
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
-    elif "CUDA_VISIBLE_DEVICES" in os.environ:
-        # activate gpu again
-        del os.environ["CUDA_VISIBLE_DEVICES"]
-
     # import dependencies
     if dependencies is not None:
         for dependency in dependencies:
