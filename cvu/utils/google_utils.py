@@ -30,7 +30,7 @@ def gdrive_download(id_: str, filepath: str, unzip: bool = False) -> None:
 
     session = requests.Session()
 
-    response = session.get(url, params={'id': id_}, stream=True)
+    response = session.get(url, params={'id': id_, 'confirm': 1}, stream=True)
     token = get_confirm_token(response)
 
     if token:
