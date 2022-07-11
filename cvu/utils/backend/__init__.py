@@ -20,27 +20,24 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
         ValueError: raised if invalid device is selected for the backend
 
     Returns:
-        bool: True if backend setup was success, False otherwise
+        bool: name of target device if backend setup was success, None otherwise
     """
     # check if backend_name is valid
     if backend_name not in SUPPORTED_BACKENDS:
         raise NotImplementedError(
             f"[CVU] {backend_name} not supported. Please use a valid backend.")
 
-    if device != "auto" and (
-            device
-            not in SUPPORTED_BACKENDS[backend_name]["auto_device_priority"]):
+    backend_config = SUPPORTED_BACKENDS[backend_name]
+    if device != "auto" and (device not in backend_config["device_configs"]):
         raise ValueError(
             f"[CVU] {device} is not supported for {backend_name} backend.")
 
     # choose target devices
+    devices = [device]
     if device == "auto":
-        devices = SUPPORTED_BACKENDS[backend_name]["auto_device_priority"]
-    else:
-        devices = [device]
+        devices = backend_config["auto_device_priority"]
 
     # try setting up backend for target_devices in priority order
-    backend_config = SUPPORTED_BACKENDS[backend_name]
     for target_device in devices:
         print(
             f"[CVU-INFO] Attempting to setup {backend_name} for {target_device} device"
