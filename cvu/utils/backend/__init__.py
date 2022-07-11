@@ -6,6 +6,7 @@ from cvu.utils.backend.package import setup_package
 
 SUPPORTED_BACKENDS = load_json(get_path(__file__, "backend_config.json"))
 
+
 def setup_backend(backend_name: str, device: str = "auto") -> bool:
     """Setup Backend and install dependencies
 
@@ -25,9 +26,12 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
     if backend_name not in SUPPORTED_BACKENDS:
         raise NotImplementedError(
             f"[CVU] {backend_name} not supported. Please use a valid backend.")
-    
-    if device!="auto" and (device not in SUPPORTED_BACKENDS[backend_name]["auto_device_priority"]):
-        raise ValueError(f"[CVU] {device} is not supported for {backend_name} backend.")
+
+    if device != "auto" and (
+            device
+            not in SUPPORTED_BACKENDS[backend_name]["auto_device_priority"]):
+        raise ValueError(
+            f"[CVU] {device} is not supported for {backend_name} backend.")
 
     # choose target devices
     if device == "auto":
@@ -38,20 +42,27 @@ def setup_backend(backend_name: str, device: str = "auto") -> bool:
     # try setting up backend for target_devices in priority order
     backend_config = SUPPORTED_BACKENDS[backend_name]
     for target_device in devices:
-        print(f"[CVU-INFO] Attempting to setup {backend_name} for {target_device} device")
+        print(
+            f"[CVU-INFO] Attempting to setup {backend_name} for {target_device} device"
+        )
         config = backend_config["device_configs"][target_device]
-        
+
         if setup_package(**config):
             # test gpu availability if gpu-backend
             if target_device == "gpu":
                 module = importlib.import_module(f".setup_{backend_name}",
-                                         "cvu.utils.backend")
+                                                 "cvu.utils.backend")
                 if not module.is_gpu_available():
-                    print(f"[CVU-WARNING] GPU not detected")
+                    print("[CVU-WARNING] GPU not detected")
                     continue
             print(f"[CVU-INFO] Using backend {backend_name}-{target_device}")
             return target_device
-        print(f"[CVU-WARNING] Failed to setup {backend_name} for {target_device} device")
-    
-    print(f"[CVU-ERROR] Failed to setup {backend_name}. Please try to install it manually or choose different backend configuration.")
+        print(
+            f"[CVU-WARNING] Failed to setup {backend_name} for {target_device} device"
+        )
+
+    print(
+        f"[CVU-ERROR] Failed to setup {backend_name}.",
+        "Please try to install it manually or choose different backend configuration."
+    )
     return None

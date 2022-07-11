@@ -1,7 +1,6 @@
 """This file contains utility functions to install, setup and
 test various pip package and there dependencies.
 """
-import os
 import subprocess
 import sys
 import importlib
@@ -25,10 +24,10 @@ def install(package: str, *args) -> None:
 
 
 def setup_package(package_name: str,
-          import_name: str,
-          version: str = None,
-          args: List[str] = None,
-          dependencies: List[str] = None) -> bool:
+                  import_name: str,
+                  version: str = None,
+                  args: List[str] = None,
+                  dependencies: List[str] = None) -> bool:
     """Install package and relevant dependencies if not already installed,
     and test error-free import.
 
@@ -78,13 +77,13 @@ def setup_package(package_name: str,
     return False
 
 
-def attempt_import(package: str,
-                   dependencies: List[str] = None) -> None:
+def attempt_import(package: str, dependencies: List[str] = None) -> None:
     """Imports the package and all given dependencies
 
     Args:
         package (str): package to import
-        dependencies (List[str], optional): name of dependency packages. Defaults to None.
+        dependencies (List[str], optional): name of dependency packages.
+        Defaults to None.
     """
     # import dependencies
     if dependencies is not None:

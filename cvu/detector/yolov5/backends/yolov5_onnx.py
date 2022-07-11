@@ -27,6 +27,7 @@ class Yolov5(IModel):
     Inputs are expected to be normalized in channels-first order
     with/without batch axis.
     """
+
     def __init__(self, weight: str = "yolov5s", device: str = 'auto') -> None:
         """Initiate Model
 
@@ -67,8 +68,8 @@ class Yolov5(IModel):
             self._model = onnxruntime.InferenceSession(
                 weight, providers=["CPUExecutionProvider"])
             return
-        
-        elif self._device == "gpu":
+
+        if self._device == "gpu":
             # load model on gpu
             self._model = onnxruntime.InferenceSession(
                 weight, providers=['CUDAExecutionProvider'])
@@ -77,7 +78,8 @@ class Yolov5(IModel):
         # load-model with auto-device selection
         try:
             self._model = onnxruntime.InferenceSession(
-                weight, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+                weight,
+                providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 
         # failed to load model, try CPU runtime if applicable
         except RuntimeError as error:
