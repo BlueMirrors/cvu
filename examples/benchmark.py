@@ -10,7 +10,7 @@ import cv2
 
 sys.path.insert(0, "./")
 from cvu.detector import Detector
-from cvu.utils.backend.package import setup
+from cvu.utils.backend.package import setup_package
 from cvu.utils.google_utils import gdrive_download
 
 BACKEND_FROM_DEVICE = {
@@ -45,7 +45,7 @@ def print_benchmark(backend_benchmark: dict) -> None:
 def install_dependencies() -> None:
     """Install dependencies for benchmarking.
     """
-    setup("vidsz", "cpu")
+    setup_package("vidsz", "cpu")
     vidsz = importlib.import_module("vidsz.opencv")
     return vidsz
 
@@ -66,7 +66,7 @@ def setup_static_files(no_video: bool = False) -> None:
 
 
 def test_image(backends: list, img: str, iterations: int, warmups: int,
-               device: str) -> None:
+               device: str, auto_install: bool) -> None:
     """Benchmark default model of backend with read/write image
 
     Args:
@@ -74,6 +74,8 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
         img (str): path to image
         iterations (int): number of iterations to benchmark for.
         warmups (int): number of iterations for warmup.
+        device (str): device to benchmark on.
+        auto_install (bool): auto install dependencies
     """
     backend_benchmark = {}
     # download files if needed
@@ -84,7 +86,10 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
     # setup
     for backend in backends:
         frame = cv2.imread(img)
-        detector = Detector(classes='coco', backend=backend, device=device)
+        detector = Detector(classes='coco',
+                            backend=backend,
+                            device=device,
+                            auto_install=auto_install)
 
         # Warm up
         for _ in range(warmups):
@@ -111,7 +116,7 @@ def test_image(backends: list, img: str, iterations: int, warmups: int,
 
 
 def test_video(backends: list, video: str, max_frames: int, warmups: int,
-               device: str, no_write: bool) -> None:
+               device: str, no_write: bool, auto_install: bool) -> None:
     """Benchmark default model of backend with read/write
     video and option to not write output.
     Args:
@@ -121,6 +126,7 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
         warmups (int): number of iterations for warmup.
         device (str): device to benchmark on.
         no_write (bool): don't write output.
+        auto_install (bool): auto install dependencies
     """
     backend_benchmark = {}
     # download files if needed
@@ -133,7 +139,10 @@ def test_video(backends: list, video: str, max_frames: int, warmups: int,
 
     # loop over backends
     for backend in backends:
-        detector = Detector(classes='coco', backend=backend, device=device)
+        detector = Detector(classes='coco',
+                            backend=backend,
+                            device=device,
+                            auto_install=auto_install)
         reader = vidsz.Reader(video)
         if not no_write:
             writer = vidsz.Writer(reader,
@@ -205,6 +214,9 @@ if __name__ == "__main__":
                         action='store_true',
                         default=False,
                         help='do not write output')
+    PARSER.add_argument('-auto-install',
+                        action='store_true',
+                        help='auto install dependencies')
     OPT = PARSER.parse_args()
 
     # set default warmup and iterations if device=gpu
@@ -228,10 +240,10 @@ if __name__ == "__main__":
     # run inference based on image or video
     if OPT.img:
         test_image(OPT.backend, OPT.img, OPT.iterations, OPT.warmups,
-                   OPT.device)
+                   OPT.device, OPT.auto_install)
     elif OPT.video:
         test_video(OPT.backend, OPT.video, OPT.max_frames, OPT.warmups,
-                   OPT.device, OPT.no_write)
+                   OPT.device, OPT.no_write, OPT.auto_install)
     else:
         # run inference on default image and videos
         print(COLOR_MAP['OK'],
@@ -240,7 +252,7 @@ if __name__ == "__main__":
               COLOR_MAP['RESET'])
         print(COLOR_MAP['YELLOW'], "IMAGE BENCHMARK", COLOR_MAP['RESET'])
         test_image(OPT.backend, "zidane.jpg", OPT.iterations, OPT.warmups,
-                   OPT.device)
+                   OPT.device, OPT.auto_install)
         print(COLOR_MAP['YELLOW'], "VIDEO BENCHMARK", COLOR_MAP['RESET'])
         test_video(OPT.backend, "people.mp4", OPT.max_frames, OPT.warmups,
-                   OPT.device, OPT.no_write)
+                   OPT.device, OPT.no_write, OPT.auto_install)
