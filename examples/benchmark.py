@@ -45,7 +45,7 @@ def print_benchmark(backend_benchmark: dict) -> None:
 def install_dependencies() -> None:
     """Install dependencies for benchmarking.
     """
-    setup_package("vidsz", "cpu")
+    setup_package("vidsz", "vidsz")
     vidsz = importlib.import_module("vidsz.opencv")
     return vidsz
 
