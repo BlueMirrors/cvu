@@ -1,0 +1,103 @@
+{
+    "torch": {
+        "device_configs":{
+            "cpu":{
+                "package_name": "torch",
+                "import_name": "torch",
+                "version": null,
+                "args": null,
+                "dependencies": ["torchvision"]
+            },
+    
+            "gpu":{
+                "package_name": "torch",
+                "import_name": "torch",
+                "version": null,
+                "args": null,
+                "dependencies": ["torchvision"]
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
+    },
+
+    "tensorflow": {
+        "device_configs":{
+            "cpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            },
+
+            "gpu":{
+                "package_name": "tensorflow-gpu",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            },
+
+            "tpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
+    },
+
+    "tflite": {
+        "device_configs":{
+            "cpu":{
+                "package_name": "tensorflow",
+                "import_name": "tensorflow.lite",
+                "version": null,
+                "args": null,
+                "dependencies": null
+            }
+        },
+
+        "auto_device_priority": ["cpu"]
+    },
+
+    "onnx": {
+        "device_configs":{
+            "cpu":{
+                "package_name": "onnxruntime",
+                "import_name": "onnxruntime",
+                "version": null,
+                "args": null,
+                "dependencies": ["onnx"]
+            },
+
+            "gpu":{
+                "package_name": "onnxruntime-gpu",
+                "import_name": "onnxruntime",
+                "version": null,
+                "args": null,
+                "dependencies": ["onnx"]
+            }
+        },
+
+        "auto_device_priority": ["gpu", "cpu"]
+    },
+
+    "tensorrt": {
+        "device_configs":{
+            "gpu":{
+                "package_name": "nvidia-tensorrt",
+                "import_name": "tensorrt",
+                "version": null,
+                "args": ["--index-url", "https://pypi.ngc.nvidia.com"],
+                "dependencies": ["pycuda"]
+            }
+        },
+
+        "auto_device_priority": ["gpu"]
+    }
+}

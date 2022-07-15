@@ -27,6 +27,7 @@ class Yolov5(IModel):
     Inputs are expected to be unormalized in channels-first order
     (with/without batch axis).
     """
+
     def __init__(self, weight: str = "yolov5s", device='auto') -> None:
         """Initiate Model
 
@@ -36,9 +37,9 @@ class Yolov5(IModel):
             pretrained models. Defaults to "yolov5s".
 
             device (str, optional): name of the device to be used. Valid devices can be
-            "cpu", "gpu", "cuda", "auto" or specific cuda devices such as
-            "cuda:0" or "cuda:1" etc. Defaults to "auto" which tries to use the device
-            best suited for selected backend and the hardware avaibility.
+            "cpu", "gpu", "auto" or specific cuda devices such as
+            "cuda:0" or "cuda:1" etc with auto_install False. Defaults to "auto" which tries
+            to use the device best suited for selected backend and the hardware avaibility.
         """
         # initiate class attributes
         self._device = None
@@ -56,7 +57,7 @@ class Yolov5(IModel):
         Args:
             device (str): name of the device to be used.
         """
-        if device in ('auto', 'cuda', 'gpu'):
+        if device in ('auto', 'gpu'):
             self._device = torch.device(
                 'cuda:0' if torch.cuda.is_available() else 'cpu')
         else:

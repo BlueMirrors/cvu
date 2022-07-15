@@ -38,7 +38,7 @@ class Yolov5(IModel):
             pretrained models. Defaults to "yolov5s".
 
             device (str, optional): name of the device to be used. Valid devices can be
-            "cpu", "gpu", "cuda", "auto", "tpu". Defaults to "auto" which tries to use the
+            "cpu", "gpu", "auto", "tpu". Defaults to "auto" which tries to use the
             device best suited for selected backend and the hardware avaibility.
         """
         # initiate class attributes
@@ -66,7 +66,7 @@ class Yolov5(IModel):
         gpus = len(tf.config.list_physical_devices('GPU'))
 
         # set FP16 if GPU available and selected
-        if device in ('auto', 'cuda', 'gpu') and gpus > 0:
+        if device in ('auto', 'gpu') and gpus > 0:
             self._device = 'cuda:0'
             mixed_precision.set_global_policy('mixed_float16')
 
