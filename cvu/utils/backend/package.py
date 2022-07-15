@@ -20,7 +20,7 @@ def install(package: str, *args) -> None:
             [sys.executable, "-m", "pip", "install", package, *args])
         print(output.decode("utf-8"))
     except subprocess.CalledProcessError:
-        print(f"[CVU-Error] {package.title()} Auto-Installation Failed...")
+        print(f"[CVU-Error] '{package}' Auto-Installation Failed...")
 
 
 def setup_package(package_name: str,
@@ -71,8 +71,8 @@ def setup_package(package_name: str,
 
     # failed to install properly
     except ModuleNotFoundError:
-        print(f"[CVU-Error] {package_name.title()} Import Failed, either",
-              "change backend or reinstall it properly...")
+        print(f"[CVU-Error] Failed to install '{package_name}'",
+              "please install it manually.")
 
     return False
 
