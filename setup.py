@@ -29,4 +29,4 @@ setup(name="cvu-python",
           "Programming Language :: Python :: 3.9",
       ],
       packages=find_packages(exclude=("examples", )),
-      install_requires=["opencv-python", "vidsz", "numpy", "requests"])
+      install_requires=["opencv-python", "vidsz", "numpy", "gdown"])
