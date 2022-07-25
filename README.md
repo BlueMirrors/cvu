@@ -5,6 +5,7 @@
 
 
 <br>
+
 Computer Vision deployment tools for dummies and experts.<br><br>
 Whether you are developing an optimized computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the expert and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br><br>
 
