@@ -19,7 +19,7 @@ pip install cvu-python
 # Index 📋
 
 - [Getting Started](#cvu--says-hi) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
-- [What is and why CVU?](https://github.com/BlueMirrors/cvu/wiki)
+- [Why CVU?](https://github.com/BlueMirrors/cvu/wiki)
 - [Object Detection (YOLOv5)](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-object-detection) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1FvebFw40Bm0bUHWCgS0-iuYp8AKLIfSh?usp=sharing)
   - [TensorRT](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-TensorRT)
   - [Torch](https://github.com/BlueMirrors/cvu/wiki/YOLOv5-Torch)
