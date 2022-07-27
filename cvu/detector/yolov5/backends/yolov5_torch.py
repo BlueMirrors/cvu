@@ -50,6 +50,9 @@ class Yolov5(IModel):
 
         # load jit-model
         self._load_model(weight)
+        
+        # set model to eval mode
+        self._model.eval()
 
     def _set_device(self, device: str) -> None:
         """Internally setup torch.device
@@ -87,9 +90,6 @@ class Yolov5(IModel):
         # use FP16 if GPU is being used
         if self._device.type != 'cpu':
             self._model.half()
-
-        # set model to eval mode
-        self._model.eval()
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Performs model inference on given inputs, and returns
