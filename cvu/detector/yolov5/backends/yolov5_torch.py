@@ -50,7 +50,7 @@ class Yolov5(IModel):
 
         # load jit-model
         self._load_model(weight)
-        
+
         # set model to eval mode
         self._model.eval()
 
