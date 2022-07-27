@@ -88,6 +88,9 @@ class Yolov5(IModel):
         if self._device.type != 'cpu':
             self._model.half()
 
+        # set model to eval mode
+        self._model.eval()
+
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Performs model inference on given inputs, and returns
         inference's output after NMS.
@@ -100,7 +103,8 @@ class Yolov5(IModel):
             np.ndarray: inference's output after NMS
         """
         inputs = self._preprocess(inputs)
-        outputs = self._model(inputs)[0]
+        with torch.no_grad():
+            outputs = self._model(inputs)[0]
         return self._postprocess(outputs)[0].cpu().detach().numpy()
 
     def __repr__(self) -> str:
