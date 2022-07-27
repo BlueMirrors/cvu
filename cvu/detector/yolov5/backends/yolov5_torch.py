@@ -103,7 +103,8 @@ class Yolov5(IModel):
             np.ndarray: inference's output after NMS
         """
         inputs = self._preprocess(inputs)
-        outputs = self._model(inputs)[0]
+        with torch.no_grad():
+            outputs = self._model(inputs)[0]
         return self._postprocess(outputs)[0].cpu().detach().numpy()
 
     def __repr__(self) -> str:
