@@ -108,7 +108,7 @@ class Yolov5(IModel):
         # set load_options needed for TPU (if needed)
         load_options = None
         if self._device == 'tpu':
-            load_options = tf.saved_model.SaveOptions(
+            load_options = tf.saved_model.LoadOptions(
                 experimental_io_device="/job:localhost")
 
         # load model
