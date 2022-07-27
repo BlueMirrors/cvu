@@ -88,6 +88,9 @@ class Yolov5(IModel):
         if self._device.type != 'cpu':
             self._model.half()
 
+        # set model to eval mode
+        self._model.eval()
+
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Performs model inference on given inputs, and returns
         inference's output after NMS.
