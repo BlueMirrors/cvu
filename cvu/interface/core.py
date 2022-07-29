@@ -3,7 +3,6 @@ A core defines one complete method/solution for certain use cases.
 For example, YoloV5 is a core of Object Detection use cases.
 """
 import abc
-from typing import Union, List
 
 import numpy as np
 
