@@ -15,13 +15,12 @@ class ICore(metaclass=abc.ABCMeta):
     A core defines one complete method/solution for certain use cases.
     For example, YoloV5 is a core of Object Detection use cases.
     """
+
     @abc.abstractmethod
-    def __init__(self, classes: Union[str, List[str]], backend: str, *args,
-                 **kwargs) -> None:
+    def __init__(self, backend: str, *args, **kwargs) -> None:
         """Initiate Core.
 
         Args:
-            classes (Union[str, List[str]]): single object class name or list of classes
             backend (str): name of the backend to run core on.
         """
         ...
