@@ -33,3 +33,11 @@ class UniCL(ICore):
         if auto_install:
             setup_backend(backend, device)
         # self._load_model(backend, device, **kwargs)
+
+    def __repr__(self) -> str:
+        """Returns Backend and Model Information
+
+        Returns:
+            str: information string
+        """
+        return str(self._model)
