@@ -18,4 +18,6 @@ class UniCL(ICore):
     __BACKEND_PKG = "cvu.image_text_matching.unicl.backends"
 
     def __init__(self):
+        # ICore
+        super().__init__()
         pass
