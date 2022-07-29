@@ -63,7 +63,7 @@ class Yolov5(ICore):
             backend.
         """
         # ICore
-        super().__init__(classes, backend)
+        super().__init__(backend, classes)
 
         # initiate class attributes
         self._preprocess = [letterbox, bgr_to_rgb]
@@ -154,7 +154,8 @@ class Yolov5(ICore):
                                       original_shape).round()
         return outputs
 
-    def _load_model(self, backend_name: str, weight: str, device: str, **kwargs: Any) -> None:
+    def _load_model(self, backend_name: str, weight: str, device: str,
+                    **kwargs: Any) -> None:
         """Internally loads Model (backend)
 
         Args:
