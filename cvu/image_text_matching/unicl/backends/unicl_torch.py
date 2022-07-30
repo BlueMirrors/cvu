@@ -19,6 +19,10 @@ class UniCL(IModel):
         self._device = None
         self._model = None
         self._transform = None
+        # TODO - maybe move this to a file?
+        self._query = [
+            "a photo of a cat", "a photo of a dog", "a photo of a person"
+        ]
 
         # setup device
         self._set_device(device)
@@ -81,7 +85,16 @@ class UniCL(IModel):
         self._model.eval()
 
     def __call__(self, inputs: np.ndarray, query: str) -> np.ndarray:
+        # apply preprocessing to image
         inputs = self._preprocess(inputs)
+
+        # apply preprocessing to query
+        query = self._preprocess_query(query)
+
+        with torch.no_grad():
+            image_features, text_features, T = self._model(inputs, query)
+            probs = (T * image_features @ text_features.t()).softmax(
+                dim=-1).cpu().numpy()
 
     def _preprocess(self, image: np.ndarray) -> torch.Tensor:
         """Apply image transforms for the model.
@@ -97,3 +110,17 @@ class UniCL(IModel):
 
         # apply transforms
         return self._transform(image).unsqueeze(0).to(self._device)
+
+    def _preprocess_query(self, query: str) -> torch.Tensor:
+        # add query to the list of queries, if not already in there
+        if query not in self._query:
+            self._query.append(query)
+
+        # apply tokenizer
+        query = self._model.tokenizer(self._query,
+                                      padding='max_length',
+                                      truncation=True,
+                                      max_length=77,
+                                      return_tensors='pt').to(self._device)
+
+        return query
