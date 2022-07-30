@@ -1,4 +1,3 @@
-from email.mime import image
 import os
 
 import numpy as np
