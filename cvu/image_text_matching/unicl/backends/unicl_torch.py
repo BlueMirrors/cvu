@@ -64,8 +64,6 @@ class UniCL(IModel):
         """
         # attempt to load predefined weights
         if not os.path.exists(weight):
-            if self._device != 'cpu':
-                weight += '.cuda'
 
             # get path to pretrained weights
             weight = get_path(__file__, "weights", f"{weight}.pth")
