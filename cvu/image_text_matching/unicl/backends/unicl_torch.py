@@ -1,8 +1,11 @@
 import os
-from typing import List
 
 import numpy as np
+from PIL import Image
 import torch
+from torchvision import transforms
+from timm.data.transforms import _pil_interp
+from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
@@ -15,12 +18,27 @@ class UniCL(IModel):
         # initiate class attributes
         self._device = None
         self._model = None
+        self._transform = None
 
         # setup device
         self._set_device(device)
 
         # load model
         self._load_model(weight)
+
+        # set transforms
+        self._transforms()
+
+    def _transforms(self) -> None:
+        """Internally setup image transforms for the model.
+        """
+        # declare pytorch transforms
+        self._transform = transforms.Compose([
+            transforms.Resize((224, 224),
+                              Interpolation=_pil_interp("bicubic")),
+            transforms.ToTensor(),
+            transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD)
+        ])
 
     def _set_device(self, device: str) -> None:
         """Internally setup torch.device
@@ -61,3 +79,21 @@ class UniCL(IModel):
 
         # set model to eval mode
         self._model.eval()
+
+    def __call__(self, inputs: np.ndarray, query: str) -> np.ndarray:
+        inputs = self._preprocess(inputs)
+
+    def _preprocess(self, image: np.ndarray) -> torch.Tensor:
+        """Apply image transforms for the model.
+
+        Args:
+            image (np.ndarray): image in BGR format.
+
+        Returns:
+            torch.Tensor: transformed image.
+        """
+        # get a pil image
+        image = Image.fromarray(image).convert("RGB")
+
+        # apply transforms
+        return self._transform(image).unsqueeze(0).to(self._device)
