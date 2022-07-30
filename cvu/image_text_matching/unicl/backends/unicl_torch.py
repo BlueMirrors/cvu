@@ -21,3 +21,15 @@ class UniCL(IModel):
 
         # load model
         self._load_model(weight)
+
+    def _set_device(self, device: str) -> None:
+        """Internally setup torch.device
+
+        Args:
+            device (str): name of the device to be used.
+        """
+        if device in ('auto', 'gpu'):
+            self._device = torch.device(
+                'cuda:0' if torch.cuda.is_available() else 'cpu')
+        else:
+            self._device = torch.device(device)
