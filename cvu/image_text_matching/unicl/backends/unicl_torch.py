@@ -74,11 +74,6 @@ class UniCL(IModel):
         # load model
         self._model = torch.load(weight, map_location=self._device)
 
-        # use FP16 if GPU is being used
-        # TODO - test this
-        if self._device != 'cpu':
-            self._model.half()
-
         # set model to eval mode
         self._model.eval()
 
