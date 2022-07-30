@@ -1,3 +1,4 @@
+from email.mime import image
 import os
 
 import numpy as np
@@ -95,6 +96,8 @@ class UniCL(IModel):
             image_features, text_features, T = self._model(inputs, query)
             probs = (T * image_features @ text_features.t()).softmax(
                 dim=-1).cpu().numpy()
+
+        return image_features.cpu().numpy(), text_features.cpu().numpy(), probs
 
     def _preprocess(self, image: np.ndarray) -> torch.Tensor:
         """Apply image transforms for the model.
