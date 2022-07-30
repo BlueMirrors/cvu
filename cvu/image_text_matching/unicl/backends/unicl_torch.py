@@ -99,6 +99,14 @@ class UniCL(IModel):
 
         return image_features.cpu().numpy(), text_features.cpu().numpy(), probs
 
+    def __repr__(self) -> str:
+        """Return Model Information.
+
+        Returns:
+            str: information string.
+        """
+        return f"UniCL: {self._device.type}"
+
     def _preprocess(self, image: np.ndarray) -> torch.Tensor:
         """Apply image transforms for the model.
 
