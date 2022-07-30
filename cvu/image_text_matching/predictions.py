@@ -37,3 +37,12 @@ class Predictions(IPredictions):
 
         # append
         self._outputs.append(prediction)
+
+    def append(self, output_: Prediction) -> None:
+        self._outputs.append(output_)
+
+    def remove(self, output_: Prediction) -> None:
+        self._outputs.remove(output_)
+
+    def clear(self) -> None:
+        self._outputs.clear()
