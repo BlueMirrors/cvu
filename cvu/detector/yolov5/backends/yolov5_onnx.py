@@ -148,8 +148,8 @@ class Yolov5(IModel):
         outputs = non_max_suppression_np(outputs[0])
         return outputs
 
+    @staticmethod
     def _onnx_from_torchscript(
-        self,
         torchscript_model: str,
         shape: Tuple[int, int]=(640, 640),
         save_path=None,
