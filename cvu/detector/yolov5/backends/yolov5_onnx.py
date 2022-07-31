@@ -10,6 +10,9 @@ import os
 from typing import List
 
 import numpy as np
+import torch
+import onnx
+import onnxsim
 import onnxruntime
 
 from cvu.interface.model import IModel
@@ -51,8 +54,12 @@ class Yolov5(IModel):
             weight (str): path to ONNX weight file or predefined-identifiers
             (such as yolvo5s, yolov5m, etc.)
         """
+        if weight.endswith("torchscript"):
+            # convert to onnx
+            weight = self._onnx_from_torchscript(weight, save_path=weight.replace("torchscript", "onnx"))
+
         # attempt to load predefined weights
-        if not os.path.exists(weight):
+        elif not os.path.exists(weight):
 
             # get path to pretrained weights
             weight += '.onnx'
@@ -131,3 +138,77 @@ class Yolov5(IModel):
         # apply nms
         outputs = non_max_suppression_np(outputs[0])
         return outputs
+
+    def _onnx_from_torchscript(
+        self, 
+        torchscript_model: str, 
+        shape: List=[640, 640], 
+        save_path=None, 
+        simplify=False,
+        dynamic=False):
+        """Convert torchscript model to ONNX.
+
+        Args:
+            torchscript_model: path to torchscript model
+
+        Returns:
+
+        Raises:
+        
+        """
+        if not os.path.exists(torchscript_model):
+            raise FileNotFoundError(f"{torchscript_model} doesnt not exist.")
+        
+        if save_path is None:
+            save_path = torchscript_model.replace('torchscript', 'onnx')
+
+        # load torchscript model
+        extra_files = {'config.txt': ''}  # model metadata
+        model = torch.jit.load(torchscript_model, map_location='cpu', _extra_files=extra_files)
+
+        im = torch.zeros((1,3, *shape))
+
+        try:
+
+            print(f'\n[CVU-Info] starting export with onnx {onnx.__version__}...')
+
+            torch.onnx.export(
+                model,
+                im,
+                save_path,
+                verbose=False,
+                opset_version=13,
+                training=torch.onnx.TrainingMode.EVAL,
+                do_constant_folding=True,
+                input_names=['images'],
+                output_names=['output'],
+                dynamic_axes={
+                    'images': {
+                        0: 'batch',
+                        2: 'height',
+                        3: 'width'},  # shape(1,3,640,640)
+                    'output': {
+                        0: 'batch',
+                        1: 'anchors'}  # shape(1,25200,85)
+                } if dynamic else None)
+
+            # Checks
+            model_onnx = onnx.load(save_path)  # load onnx model
+            onnx.checker.check_model(model_onnx)  # check onnx model
+
+            # Simplify
+            if simplify:
+                try:
+
+                    print(f'[CVU-Info] simplifying with onnx-simplifier {onnxsim.__version__}...')
+                    model_onnx, check = onnxsim.simplify(model_onnx,
+                                                         dynamic_input_shape=dynamic,
+                                                         input_shapes={'images': list(im.shape)} if dynamic else None)
+                    assert check, 'assert check failed'
+                    onnx.save(model_onnx, save_path)
+                except Exception as e:
+                    print(f'[CVU-Info] simplifier failure: {e}')
+            print(f'[CVU-Info] export success, saved as {save_path})')
+            return save_path
+        except Exception as e:
+            print(f'[CVU-Info] export failure: {e}')
