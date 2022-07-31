@@ -12,7 +12,6 @@ from typing import List, Tuple
 import numpy as np
 import torch
 import onnx
-import onnxsim
 import onnxruntime
 
 from cvu.interface.model import IModel
@@ -154,7 +153,6 @@ class Yolov5(IModel):
         torchscript_model: str,
         shape: Tuple[int, int]=(640, 640),
         save_path=None,
-        simplify=False,
         dynamic=False):
         """Convert torchscript model to ONNX.
 
@@ -211,20 +209,8 @@ class Yolov5(IModel):
             model_onnx = onnx.load(save_path)  # load onnx model
             onnx.checker.check_model(model_onnx)  # check onnx model
 
-            # Simplify
-            if simplify:
-                try:
-
-                    print(f'[CVU-Info] simplifying with onnx-simplifier {onnxsim.__version__}...')
-                    model_onnx, check = onnxsim.simplify(
-                        model_onnx,
-                        dynamic_input_shape=dynamic,
-                        input_shapes={'images': list(img.shape)} if dynamic else None)
-                    assert check, 'assert check failed'
-                    onnx.save(model_onnx, save_path)
-                except Exception as exception:
-                    print(f'[CVU-Info] simplifier failure: {exception}')
             print(f'[CVU-Info] export success, saved as {save_path})')
             return save_path
-        except Exception as exception:
+        except Exception as exception:  # pylint: disable=broad-except
             print(f'[CVU-Info] export failure: {exception}')
+        return None
