@@ -1,7 +1,6 @@
 """This file contains utility functions to install, setup and
 test various pip package and there dependencies.
 """
-import os
 import subprocess
 import sys
 import importlib
@@ -21,30 +20,30 @@ def install(package: str, *args) -> None:
             [sys.executable, "-m", "pip", "install", package, *args])
         print(output.decode("utf-8"))
     except subprocess.CalledProcessError:
-        print(f"[CVU-Error] {package.title()} Auto-Installation Failed...")
+        print(f"[CVU-Error] '{package}' Auto-Installation Failed...")
 
 
-def setup(package: str,
-          device: str,
-          dependencies: List[str] = None,
-          version: str = None,
-          args: List[str] = None) -> bool:
+def setup_package(package_name: str,
+                  import_name: str,
+                  version: str = None,
+                  args: List[str] = None,
+                  dependencies: List[str] = None) -> bool:
     """Install package and relevant dependencies if not already installed,
     and test error-free import.
 
     Args:
-        package (str): name of the package to install and test
-        device (str): name of the device
-        dependencies (List[str], optional): name of dependency packages. Defaults to None.
+        package_name (str): name of the package to install and test
+        import_name (str): name of the module that will be imported
         version (str, optional): specific version. Defaults to None.
         args (List[str], optional): specific pip install arguments. Defaults to None.
+        dependencies (List[str], optional): name of dependency packages. Defaults to None.
 
     Returns:
         bool: True if install and test ran successfully, False otherwise
     """
     # check if already installed
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(import_name, dependencies)
         return True
 
     # attempt installation
@@ -52,7 +51,7 @@ def setup(package: str,
 
         # add version info if needed
         if version is not None:
-            package = f'{package}=={version}'
+            package_name = f'{package_name}=={version}'
 
         # install dependencies
         if dependencies is not None:
@@ -61,44 +60,31 @@ def setup(package: str,
 
         # pass on pip args if applicable
         if args:
-            install(package, *args)
+            install(package_name, *args)
         else:
-            install(package)
+            install(package_name)
 
     # test if installation was successful
     try:
-        attempt_import(package, device, dependencies)
+        attempt_import(import_name, dependencies)
         return True
 
     # failed to install properly
     except ModuleNotFoundError:
-        print(f"[CVU-Error] {package.title()} Import Failed, either",
-              "change backend or reinstall it properly...")
+        print(f"[CVU-Error] Failed to install '{package_name}'",
+              "please install it manually.")
 
     return False
 
 
-def attempt_import(package: str,
-                   device: str,
-                   dependencies: List[str] = None) -> None:
+def attempt_import(package: str, dependencies: List[str] = None) -> None:
     """Imports the package and all given dependencies
 
     Args:
         package (str): package to import
-        device (str): name of the device
-        dependencies (List[str], optional): name of dependency packages. Defaults to None.
+        dependencies (List[str], optional): name of dependency packages.
+        Defaults to None.
     """
-    if device in ("cpu", "tpu"):
-        # disable GPUs explicitly
-        os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
-    elif "CUDA_VISIBLE_DEVICES" in os.environ:
-        # activate gpu again
-        del os.environ["CUDA_VISIBLE_DEVICES"]
-
-    # sanitize (for example tensorflow-gpu => tensorflow)
-    package = package.split('-')[0]
-
     # import dependencies
     if dependencies is not None:
         for dependency in dependencies:

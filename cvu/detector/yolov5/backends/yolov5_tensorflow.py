@@ -29,6 +29,7 @@ class Yolov5(IModel):
 
     Inputs are expected to be normalized in channels-last order with batch axis.
     """
+
     def __init__(self, weight: str = "yolov5s", device='auto') -> None:
         """Initiate Model
 
@@ -38,13 +39,14 @@ class Yolov5(IModel):
             pretrained models. Defaults to "yolov5s".
 
             device (str, optional): name of the device to be used. Valid devices can be
-            "cpu", "gpu", "cuda", "auto", "tpu". Defaults to "auto" which tries to use the
+            "cpu", "gpu", "auto", "tpu". Defaults to "auto" which tries to use the
             device best suited for selected backend and the hardware avaibility.
         """
         # initiate class attributes
         self._model = None
         self._device = None
         self._loaded = None
+        self._signature = {"input": None, "output": None}
 
         # disable logging
         logging.disable(logging.WARNING)
@@ -66,7 +68,7 @@ class Yolov5(IModel):
         gpus = len(tf.config.list_physical_devices('GPU'))
 
         # set FP16 if GPU available and selected
-        if device in ('auto', 'cuda', 'gpu') and gpus > 0:
+        if device in ('auto', 'gpu') and gpus > 0:
             self._device = 'cuda:0'
             mixed_precision.set_global_policy('mixed_float16')
 
@@ -106,12 +108,18 @@ class Yolov5(IModel):
         # set load_options needed for TPU (if needed)
         load_options = None
         if self._device == 'tpu':
-            load_options = tf.saved_model.SaveOptions(
+            load_options = tf.saved_model.LoadOptions(
                 experimental_io_device="/job:localhost")
 
         # load model
         self._loaded = tf.saved_model.load(weight, options=load_options)
         self._model = self._loaded.signatures["serving_default"]
+
+        # set input and output signature names
+        self._signature["input"] = list(
+            self._model.structured_input_signature[1].keys())[0]
+        self._signature["output"] = list(
+            self._model.structured_outputs.keys())[0]
 
     def __call__(self, inputs: np.ndarray) -> np.ndarray:
         """Performs model inference on given inputs, and returns
@@ -124,7 +132,8 @@ class Yolov5(IModel):
         Returns:
             np.ndarray: inference's output after NMS
         """
-        outputs = self._model(input_1=inputs)['tf__detect'].numpy()
+        outputs = self._model(**{self._signature["input"]: inputs})[
+                                     self._signature["output"]].numpy()
         denormalize(outputs, inputs.shape[-3:])
         return self._postprocess(outputs)[0]
 
