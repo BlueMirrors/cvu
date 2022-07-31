@@ -7,7 +7,7 @@ Model expects normalized inputs (data-format=channels-first) with
 batch axis. Model does not apply letterboxing to given inputs.
 """
 import os
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import torch
@@ -57,7 +57,8 @@ class Yolov5(IModel):
         """
         if weight.endswith("torchscript"):
             # convert to onnx
-            weight = self._onnx_from_torchscript(weight, save_path=weight.replace("torchscript", "onnx"))
+            weight = self._onnx_from_torchscript(
+                weight, save_path=weight.replace("torchscript", "onnx"))
 
         # attempt to load predefined weights
         elif not os.path.exists(weight):
@@ -149,25 +150,30 @@ class Yolov5(IModel):
         return outputs
 
     def _onnx_from_torchscript(
-        self, 
-        torchscript_model: str, 
-        shape: List=[640, 640], 
-        save_path=None, 
+        self,
+        torchscript_model: str,
+        shape: Tuple[int, int]=(640, 640),
+        save_path=None,
         simplify=False,
         dynamic=False):
         """Convert torchscript model to ONNX.
 
         Args:
             torchscript_model: path to torchscript model
+            shape: input shape of the model
+            save_path: path to save onnx model
+            simplify: bool to simplify onnx model
+            dynamic: bool for onnx dynamic shape conversion
 
         Returns:
+            path to converted onnx model
 
         Raises:
-        
+            FileNotFoundError if torchscript model not found
         """
         if not os.path.exists(torchscript_model):
             raise FileNotFoundError(f"{torchscript_model} doesnt not exist.")
-        
+
         if save_path is None:
             save_path = torchscript_model.replace('torchscript', 'onnx')
 
@@ -175,7 +181,7 @@ class Yolov5(IModel):
         extra_files = {'config.txt': ''}  # model metadata
         model = torch.jit.load(torchscript_model, map_location='cpu', _extra_files=extra_files)
 
-        im = torch.zeros((1,3, *shape))
+        img = torch.zeros((1,3, *shape))
 
         try:
 
@@ -183,7 +189,7 @@ class Yolov5(IModel):
 
             torch.onnx.export(
                 model,
-                im,
+                img,
                 save_path,
                 verbose=False,
                 opset_version=13,
@@ -210,14 +216,15 @@ class Yolov5(IModel):
                 try:
 
                     print(f'[CVU-Info] simplifying with onnx-simplifier {onnxsim.__version__}...')
-                    model_onnx, check = onnxsim.simplify(model_onnx,
-                                                         dynamic_input_shape=dynamic,
-                                                         input_shapes={'images': list(im.shape)} if dynamic else None)
+                    model_onnx, check = onnxsim.simplify(
+                        model_onnx,
+                        dynamic_input_shape=dynamic,
+                        input_shapes={'images': list(img.shape)} if dynamic else None)
                     assert check, 'assert check failed'
                     onnx.save(model_onnx, save_path)
-                except Exception as e:
-                    print(f'[CVU-Info] simplifier failure: {e}')
+                except Exception as exception:
+                    print(f'[CVU-Info] simplifier failure: {exception}')
             print(f'[CVU-Info] export success, saved as {save_path})')
             return save_path
-        except Exception as e:
-            print(f'[CVU-Info] export failure: {e}')
+        except Exception as exception:
+            print(f'[CVU-Info] export failure: {exception}')
