@@ -7,7 +7,7 @@ Model expects normalized inputs (data-format=channels-first) with
 batch axis. Model does not apply letterboxing to given inputs.
 """
 import os
-from typing import List, Tuple
+from typing import List
 
 import numpy as np
 import onnxruntime

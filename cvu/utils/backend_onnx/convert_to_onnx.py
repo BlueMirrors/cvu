@@ -68,5 +68,5 @@ def onnx_from_torchscript(
         return save_path
     except Exception as exception:  # pylint: disable=broad-except
         print(f'[CVU-Info] export failure: {exception}')
-    
+
     return None
