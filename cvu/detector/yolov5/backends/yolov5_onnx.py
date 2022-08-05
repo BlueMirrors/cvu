@@ -10,14 +10,13 @@ import os
 from typing import List, Tuple
 
 import numpy as np
-import torch
-import onnx
 import onnxruntime
 
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
+from cvu.utils.backend_onnx.convert_to_onnx import onnx_from_torchscript
 
 
 class Yolov5(IModel):
@@ -56,7 +55,7 @@ class Yolov5(IModel):
         """
         if weight.endswith("torchscript"):
             # convert to onnx
-            weight = self._onnx_from_torchscript(
+            weight = onnx_from_torchscript(
                 weight, save_path=weight.replace("torchscript", "onnx"))
 
         # attempt to load predefined weights
@@ -147,70 +146,3 @@ class Yolov5(IModel):
         # apply nms
         outputs = non_max_suppression_np(outputs[0])
         return outputs
-
-    @staticmethod
-    def _onnx_from_torchscript(
-        torchscript_model: str,
-        shape: Tuple[int, int]=(640, 640),
-        save_path=None,
-        dynamic=False):
-        """Convert torchscript model to ONNX.
-
-        Args:
-            torchscript_model: path to torchscript model
-            shape: input shape of the model
-            save_path: path to save onnx model
-            simplify: bool to simplify onnx model
-            dynamic: bool for onnx dynamic shape conversion
-
-        Returns:
-            path to converted onnx model
-
-        Raises:
-            FileNotFoundError if torchscript model not found
-        """
-        if not os.path.exists(torchscript_model):
-            raise FileNotFoundError(f"{torchscript_model} doesnt not exist.")
-
-        if save_path is None:
-            save_path = torchscript_model.replace('torchscript', 'onnx')
-
-        # load torchscript model
-        extra_files = {'config.txt': ''}  # model metadata
-        model = torch.jit.load(torchscript_model, map_location='cpu', _extra_files=extra_files)
-
-        img = torch.zeros((1,3, *shape))
-
-        try:
-
-            print(f'\n[CVU-Info] starting export with onnx {onnx.__version__}...')
-
-            torch.onnx.export(
-                model,
-                img,
-                save_path,
-                verbose=False,
-                opset_version=13,
-                training=torch.onnx.TrainingMode.EVAL,
-                do_constant_folding=True,
-                input_names=['images'],
-                output_names=['output'],
-                dynamic_axes={
-                    'images': {
-                        0: 'batch',
-                        2: 'height',
-                        3: 'width'},  # shape(1,3,640,640)
-                    'output': {
-                        0: 'batch',
-                        1: 'anchors'}  # shape(1,25200,85)
-                } if dynamic else None)
-
-            # Checks
-            model_onnx = onnx.load(save_path)  # load onnx model
-            onnx.checker.check_model(model_onnx)  # check onnx model
-
-            print(f'[CVU-Info] export success, saved as {save_path})')
-            return save_path
-        except Exception as exception:  # pylint: disable=broad-except
-            print(f'[CVU-Info] export failure: {exception}')
-        return None
