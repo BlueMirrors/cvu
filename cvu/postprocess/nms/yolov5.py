@@ -28,7 +28,7 @@ def non_max_suppression_np(predictions: np.ndarray,
         iou_thres (float, optional): IoU threshold in range 0-1 for NMS filtering.
         Defaults to 0.45.
 
-        agnostic (bool, optional): agnostic to width-height. Defaults to False.
+        agnostic (bool, optional): Perform class-agnostic NMS. Defaults to False.
 
         multi_label (bool, optional): apply Multi-Label NMS. Defaults to False.
 
