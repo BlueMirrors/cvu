@@ -66,7 +66,7 @@ class Yolov5(ICore):
         super().__init__(classes, backend)
 
         # initiate class attributes
-        if kwargs['input_shape']!= -1:
+        if kwargs.get("input_shape", None) is not None:
             self._preprocess = [lambda image: letterbox(image, kwargs['input_shape'], auto=False),
                                 bgr_to_rgb]
         else:

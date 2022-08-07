@@ -2,7 +2,7 @@
 ONNX conversion from different frameworks.
 """
 
-from typing import Tuple
+from typing import Optional, Tuple, Union
 import os
 import onnx
 import torch
@@ -11,17 +11,16 @@ import torch
 def onnx_from_torchscript(
     torchscript_model: str,
     shape: Tuple[int, int]=(640, 640),
-    save_path=None,
-    dynamic=False):
+    save_path:Optional[str]=None,
+    dynamic:Optional[bool]=False) -> Union[str, None]:
     """Convert torchscript model to ONNX.
     Args:
-        torchscript_model: path to torchscript model
-        shape: input shape of the model
-        save_path: path to save onnx model
-        simplify: bool to simplify onnx model
-        dynamic: bool for onnx dynamic shape conversion
+        torchscript_model (str): path to torchscript model
+        shape (Optional[Tuple[int, int]]): input shape of the model
+        save_path (Optional[str]): path to save onnx model
+        dynamic (Optional[bool]): bool for onnx dynamic shape conversion
     Returns:
-        path to converted onnx model
+        Optional[str]: path to converted onnx model
     Raises:
         FileNotFoundError if torchscript model not found
     """
