@@ -9,6 +9,7 @@ batch axis. Model does not apply letterboxing to given inputs.
 import os
 from typing import List
 
+import importlib
 import numpy as np
 import onnxruntime
 
@@ -16,7 +17,6 @@ from cvu.interface.model import IModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
-from cvu.utils.backend_onnx.convert_to_onnx import onnx_from_torchscript
 
 
 class Yolov5(IModel):
@@ -55,7 +55,9 @@ class Yolov5(IModel):
         """
         if weight.endswith("torchscript"):
             # convert to onnx
-            weight = onnx_from_torchscript(
+            convert_to_onnx = importlib.import_module(
+                ".convert_to_onnx","cvu.utils.backend_onnx")
+            weight = convert_to_onnx.onnx_from_torchscript(
                 weight, save_path=weight.replace("torchscript", "onnx"))
 
         # attempt to load predefined weights
