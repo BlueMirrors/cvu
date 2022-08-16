@@ -23,6 +23,7 @@ class UniCL(ICore):
     def __init__(self,
                  backend: str = "torch",
                  weight: str = "swin_b",
+                 config: str = "swin_b",
                  device: str = "auto",
                  auto_install: bool = False,
                  **kwargs: Any) -> None:
@@ -35,7 +36,7 @@ class UniCL(ICore):
         # setup backend and load model
         if auto_install:
             setup_backend(backend, device)
-        self._load_model(backend, weight, device, **kwargs)
+        self._load_model(backend, weight, config, device, **kwargs)
 
     def __repr__(self) -> str:
         """Returns Backend and Model Information
@@ -45,12 +46,14 @@ class UniCL(ICore):
         """
         return str(self._model)
 
-    def _load_model(self, backend: str, weight: str, device: str,
+    def _load_model(self, backend: str, weight: str, config: str, device: str,
                     **kwargs: Any) -> None:
         # load model
         backend = import_module(f".unicl_{backend}", self._BACKEND_PKG)
 
-        self._model = backend.UniCL(weight, device)
+        self._model = backend.UniCL(weight=weight,
+                                    config=config,
+                                    device=device)
 
     def __call__(self, inputs: np.ndarray, query: str, **kwargs):
         # inference on backend
