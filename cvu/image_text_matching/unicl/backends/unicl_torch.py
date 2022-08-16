@@ -1,4 +1,3 @@
-from distutils.command.build import build
 import os
 
 import numpy as np
@@ -73,9 +72,13 @@ class UniCL(IModel):
             dict: model configuration
         """
         if config == 'swin_b':
-            return get_config("configs/unicl_swin_base.yaml")
+            return get_config(
+                "cvu/image_text_matching/unicl/backends/configs/unicl_swin_base.yaml"
+            )
         elif config == 'swin_t':
-            return get_config("configs/unicl_swin_tiny.yaml")
+            return get_config(
+                "cvu/image_text_matching/unicl/backends/configs/unicl_swin_tiny.yaml"
+            )
 
     def _load_model(self, weight: str) -> None:
         """Internally load torch model
