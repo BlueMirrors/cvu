@@ -3,8 +3,6 @@ import os
 
 import numpy as np
 from PIL import Image
-from config import get_config
-from model import build_model
 import torch
 from torchvision import transforms
 from timm.data.transforms import _pil_interp
@@ -13,6 +11,8 @@ from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from cvu.interface.model import IModel
 from cvu.utils.general import get_path
 from cvu.image_text_matching.unicl.backends.common import download_weights
+from cvu.image_text_matching.unicl.backends.config import get_config
+from cvu.image_text_matching.unicl.backends.model import build_model
 
 
 class UniCL(IModel):
