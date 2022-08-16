@@ -45,7 +45,7 @@ class UniCL(IModel):
         # declare pytorch transforms
         self._transform = transforms.Compose([
             transforms.Resize((224, 224),
-                              Interpolation=_pil_interp("bicubic")),
+                              interpolation=_pil_interp("bicubic")),
             transforms.ToTensor(),
             transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD)
         ])
