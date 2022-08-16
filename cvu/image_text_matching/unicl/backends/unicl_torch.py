@@ -1,7 +1,10 @@
+from distutils.command.build import build
 import os
 
 import numpy as np
 from PIL import Image
+from config import get_config
+from model import build_model
 import torch
 from torchvision import transforms
 from timm.data.transforms import _pil_interp
@@ -14,11 +17,15 @@ from cvu.image_text_matching.unicl.backends.common import download_weights
 
 class UniCL(IModel):
 
-    def __init__(self, weight: str = "swin_b", device="auto") -> None:
+    def __init__(self,
+                 weight: str = "swin_b",
+                 config: str = "swin_b",
+                 device="auto") -> None:
         # initiate class attributes
         self._device = None
         self._model = None
         self._transform = None
+        self._config = self._build_config(config)
         # TODO - maybe move this to a file?
         self._query = [
             "a photo of a cat", "a photo of a dog", "a photo of a person"
@@ -56,6 +63,20 @@ class UniCL(IModel):
         else:
             self._device = torch.device(device)
 
+    def _build_config(self, config: str) -> dict:
+        """Built config for the model.
+
+        Args:
+            config (str): name of the config to be used.
+
+        Returns:
+            dict: model configuration
+        """
+        if config == 'swin_b':
+            return get_config("configs/unicl_swin_base.yaml")
+        elif config == 'swin_t':
+            return get_config("configs/unicl_swin_tiny.yaml")
+
     def _load_model(self, weight: str) -> None:
         """Internally load torch model
 
@@ -71,8 +92,11 @@ class UniCL(IModel):
             # download weights if not already downloaded
             download_weights(weight, "torch")
 
-        # load model
-        self._model = torch.load(weight, map_location=self._device)
+        # build model
+        self._model = build_model(self._config).to(self._device)
+        # load checkpoint
+        checkpoint = torch.load(weight, map_location=self._device)
+        self._model.load_state_dict(checkpoint['model'], strict=False)
 
         # set model to eval mode
         self._model.eval()
