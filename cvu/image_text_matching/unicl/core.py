@@ -69,7 +69,7 @@ class UniCL(ICore):
         preds = Predictions()
 
         # add prediction
-        preds.create_and_append(query_list[probs.argmax(1)], max(probs),
+        preds.create_and_append(query_list[probs.argmax(1)[0]], max(probs[0]),
                                 image_features, text_features)
 
         return preds
