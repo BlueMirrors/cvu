@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import numpy as np
 from PIL import Image
@@ -104,7 +105,9 @@ class UniCL(IModel):
         # set model to eval mode
         self._model.eval()
 
-    def __call__(self, inputs: np.ndarray, query: str) -> np.ndarray:
+    def __call__(
+            self, inputs: np.ndarray,
+            query: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray, list]:
         # apply preprocessing to image
         inputs = self._preprocess(inputs)
 
@@ -116,7 +119,8 @@ class UniCL(IModel):
             probs = (T * image_features @ text_features.t()).softmax(
                 dim=-1).cpu().numpy()
 
-        return image_features.cpu().numpy(), text_features.cpu().numpy(), probs
+        return image_features.cpu().numpy(), text_features.cpu().numpy(
+        ), probs, self._query
 
     def __repr__(self) -> str:
         """Return Model Information.

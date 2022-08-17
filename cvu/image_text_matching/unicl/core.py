@@ -12,6 +12,7 @@ from importlib import import_module
 from typing import Any
 
 import numpy as np
+from cvu.image_text_matching.predictions import Predictions
 
 from cvu.interface.core import ICore
 from cvu.utils.backend import setup_backend
@@ -57,5 +58,18 @@ class UniCL(ICore):
 
     def __call__(self, inputs: np.ndarray, query: str, **kwargs):
         # inference on backend
-        image_features, text_features, probs = self._model(
+        image_features, text_features, probs, query_list = self._model(
             inputs, query, **kwargs)
+
+        return self._to_preds(image_features, text_features, probs, query_list)
+
+    def _to_preds(self, image_features: np.ndarray, text_features: np.ndarray,
+                  probs: np.ndarray, query_list: list):
+        # create container
+        preds = Predictions()
+
+        # add prediction
+        preds.create_and_append(query_list[probs.argmax(1)], max(probs),
+                                image_features, text_features)
+
+        return preds
