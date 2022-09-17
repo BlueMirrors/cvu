@@ -62,9 +62,6 @@ class Yolov5(ICore):
             auto_install (bool, optional): auto install missing requirements for the selected
             backend.
         """
-        # ICore
-        super().__init__(backend, classes)
-
         # initiate class attributes
         self._preprocess = [letterbox, bgr_to_rgb]
         self._postprocess = []
