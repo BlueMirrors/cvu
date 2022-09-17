@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IDetectorModel implementation in ONNX.
+"""This file contains Yolo's IDetectorModel implementation in ONNX.
 This model (onnx-backend) performs inference using ONNXRUNTIME,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -13,13 +13,11 @@ import numpy as np
 import onnxruntime
 
 from cvu.detector.interface import IDetectorModel
-from cvu.utils.general import get_path
-from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.nms.yolov5 import non_max_suppression_np
 
 
-class Yolov5(IDetectorModel):
-    """Implements IDetectorModel for Yolov5 using ONNX.
+class Yolo(IDetectorModel):
+    """Implements IDetectorModel for Yolo using ONNX.
 
     This model (onnx-backend) performs inference, using ONNXRUNTIME,
     on a numpy array, and returns result after performing NMS.
@@ -28,13 +26,11 @@ class Yolov5(IDetectorModel):
     with/without batch axis.
     """
 
-    def __init__(self, weight: str = "yolov5s", device: str = 'auto') -> None:
+    def __init__(self, weight: str, device: str = 'auto') -> None:
         """Initiate Model
 
         Args:
-            weight (str, optional): path to onnx weight file. Alternatively,
-            it also accepts identifiers (such as yolvo5s, yolov5m, etc.) to load
-            pretrained models. Defaults to "yolov5s".
+            weight (str): path to onnx weight file.
 
             device (str, optional): name of the device to be used. Valid devices can be
             "cpu", "gpu", "auto". Defaults to "auto" which tries to use the device
@@ -49,18 +45,10 @@ class Yolov5(IDetectorModel):
         """Internally loads ONNX
 
         Args:
-            weight (str): path to ONNX weight file or predefined-identifiers
-            (such as yolvo5s, yolov5m, etc.)
+            weight (str): path to ONNX weight file
         """
-        # attempt to load predefined weights
         if not os.path.exists(weight):
-
-            # get path to pretrained weights
-            weight += '.onnx'
-            weight = get_path(__file__, "weights", weight)
-
-            # download weights if not already downloaded
-            download_weights(weight, "onnx")
+            raise FileNotFoundError(f"Unable to locate model weights {weight}")
 
         # load model
         if self._device == "cpu":
@@ -124,7 +112,7 @@ class Yolov5(IDetectorModel):
         Returns:
             str: information string
         """
-        return f"Yolov5s ONNX-{self._device}"
+        return f"Yolo ONNX-{self._device}"
 
     @staticmethod
     def _postprocess(outputs: np.ndarray) -> List[np.ndarray]:

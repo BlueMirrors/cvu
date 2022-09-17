@@ -1,0 +1,12 @@
+{
+    "yolov5":{
+        "yolov5s":{
+            "onnx": "1piC3ZGuc4D8MMJQQRK3dgaCa66-4Ucxi",
+            "tensorflow":"1SA7hT4jUx9szqJePZ8NssMPSCelRvYpo",
+            "tensorrt":"1piC3ZGuc4D8MMJQQRK3dgaCa66-4Ucxi",
+            "tflite": "1oeKZm81Gz5OejmcgDA0biemkPWCY6qNu",
+            "torch":"1cWeCusb2IB-x-h_IZs7t3Y_rs9GkzQsI",
+            "torch.cuda":"16BFVGsEYAXsupFoCXxlOhSBovoMH6juK"
+        }
+    }
+}

@@ -1,4 +1,4 @@
-"""This module contains implementation of Yolov5 model
+"""This module contains implementation of Yolo model
 for various backends.
 
 A model (aka backend) basically performs inference on a given input numpy array,
