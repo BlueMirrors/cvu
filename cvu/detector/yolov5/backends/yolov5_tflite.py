@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in TFLite.
+"""This file contains Yolov5's IDetectorModel implementation in TFLite.
 This model (tflite-backend) performs inference using TFLite,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -12,20 +12,21 @@ from typing import Tuple, List
 import numpy as np
 import tensorflow.lite as tflite
 
-from cvu.interface.model import IModel
+from cvu.detector.interface import IDetectorModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using TFLite.
+class Yolov5(IDetectorModel):
+    """Implements IDetectorModel for Yolov5 using TFLite.
 
     This model (tflite-backend) performs inference, using TFLite,
     on a numpy array, and returns result after performing NMS.
 
     Inputs are expected to be normalized in channels-last order with batch axis.
     """
+
     def __init__(self, weight: str = "yolov5s", device='auto') -> None:
         """Initiate Model
 

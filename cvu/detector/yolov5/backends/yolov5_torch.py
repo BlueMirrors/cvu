@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in PyTorch.
+"""This file contains Yolov5's IDetectorModel implementation in PyTorch.
 This model (torch-backend) performs inference using Torch-script,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -12,14 +12,14 @@ from typing import List
 import numpy as np
 import torch
 
-from cvu.interface.model import IModel
+from cvu.detector.interface import IDetectorModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.backend_torch.nms.yolov5 import non_max_suppression_torch
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using PyTorch.
+class Yolov5(IDetectorModel):
+    """Implements IDetectorModel for Yolov5 using PyTorch.
 
     This model (torch-backend) performs inference, using Torch-script,
     on a numpy array, and returns result after performing NMS.

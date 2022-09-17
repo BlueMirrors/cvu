@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in Tensorflow.
+"""This file contains Yolov5's IDetectorModel implementation in Tensorflow.
 This model (tensorflow-backend) performs inference using SavedModel,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -14,15 +14,15 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import mixed_precision
 
-from cvu.interface.model import IModel
+from cvu.detector.interface import IDetectorModel
 from cvu.utils.general import get_path
 from cvu.detector.yolov5.backends.common import download_weights
 from cvu.postprocess.bbox import denormalize
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using Tensorflow.
+class Yolov5(IDetectorModel):
+    """Implements IDetectorModel for Yolov5 using Tensorflow.
 
     This model (tensorflow-backend) performs inference, using SavedModel,
     on a numpy array, and returns result after performing NMS.

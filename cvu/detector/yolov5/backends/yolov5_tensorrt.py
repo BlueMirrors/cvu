@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in TensorRT.
+"""This file contains Yolov5's IDetectorModel implementation in TensorRT.
 This model (tensorRT-backend) performs inference using TensorRT,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -14,7 +14,7 @@ import tensorrt as trt
 import pycuda.autoinit  # noqa # pylint: disable=unused-import
 import pycuda.driver as cuda
 
-from cvu.interface.model import IModel
+from cvu.detector.interface import IDetectorModel
 from cvu.preprocess.image.letterbox import letterbox
 from cvu.preprocess.image.general import (basic_preprocess, bgr_to_rgb,
                                           hwc_to_chw)
@@ -24,9 +24,9 @@ from cvu.postprocess.nms.yolov5 import non_max_suppression_np
 from cvu.utils.backend_tensorrt.int8_calibrator import Int8EntropyCalibrator2
 
 
-class Yolov5(IModel):
+class Yolov5(IDetectorModel):
     # noqa # pylint: disable=too-many-instance-attributes
-    """Implements IModel for Yolov5 using TensorRT.
+    """Implements IDetectorModel for Yolov5 using TensorRT.
 
     This model (tensorrt-backend) performs inference, using TensorRT,
     on a numpy array, and returns result after performing NMS.
@@ -39,6 +39,7 @@ class Yolov5(IModel):
     Inputs are expected to be normalized in channels-first order
     with/without batch axis.
     """
+
     def __init__(self,
                  weight: str = None,
                  num_classes: int = 80,
@@ -65,7 +66,8 @@ class Yolov5(IModel):
         self._dtype = dtype
         if self._dtype == "int8":
             if calib_images_dir is None:
-                raise Exception("[CVU-Error] calib_images_dir is None with dtype int8.")
+                raise Exception(
+                    "[CVU-Error] calib_images_dir is None with dtype int8.")
             self._calib_images_dir = calib_images_dir
 
         # initiate model specific class attributes
@@ -112,8 +114,9 @@ class Yolov5(IModel):
             height, width = self._input_shape[:2]
 
             # get path to pretrained weights
-            engine_path = get_path(__file__, "weights",
-                                   f"{weight}_{height}_{width}_{self._dtype}_trt.engine")
+            engine_path = get_path(
+                __file__, "weights",
+                f"{weight}_{height}_{width}_{self._dtype}_trt.engine")
 
             onnx_weight = get_path(__file__, "weights", f"{weight}_trt.onnx")
 
@@ -152,7 +155,8 @@ class Yolov5(IModel):
         self._context = self._engine.create_execution_context()
         if not self._context:
             raise Exception(
-                "[CVU-Error] Couldn't create execution context from engine successfully !")
+                "[CVU-Error] Couldn't create execution context from engine successfully !"
+            )
 
     @staticmethod
     def get_supported_dtypes(builder) -> List[str]:
@@ -172,7 +176,6 @@ class Yolov5(IModel):
         if builder.platform_has_fast_int8:
             supported_dtypes.append("int8")
         return supported_dtypes
-
 
     def _build_engine(self, onnx_weight: str, trt_engine_path: str,
                       input_shape: Tuple[int]) -> trt.tensorrt.ICudaEngine:
@@ -239,13 +242,9 @@ class Yolov5(IModel):
                     input_w=input_shape[1],
                     img_dir=self._calib_images_dir,
                     preprocess=[
-                        letterbox,
-                        bgr_to_rgb,
-                        hwc_to_chw,
-                        np.ascontiguousarray,
-                        basic_preprocess
-                    ]
-                )
+                        letterbox, bgr_to_rgb, hwc_to_chw,
+                        np.ascontiguousarray, basic_preprocess
+                    ])
 
             # parse onnx model
             with open(onnx_weight, 'rb') as onnx_file:
