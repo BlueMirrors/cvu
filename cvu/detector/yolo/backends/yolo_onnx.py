@@ -9,6 +9,7 @@ batch axis. Model does not apply letterboxing to given inputs.
 import os
 from typing import List
 
+import importlib
 import numpy as np
 import onnxruntime
 
@@ -49,6 +50,13 @@ class Yolo(IDetectorModel):
         """
         if not os.path.exists(weight):
             raise FileNotFoundError(f"Unable to locate model weights {weight}")
+
+        if weight.endswith("torchscript"):
+            # convert to onnx
+            convert_to_onnx = importlib.import_module(
+                ".convert_to_onnx", "cvu.utils.backend_onnx")
+            weight = convert_to_onnx.onnx_from_torchscript(
+                weight, save_path=weight.replace("torchscript", "onnx"))
 
         # load model
         if self._device == "cpu":
