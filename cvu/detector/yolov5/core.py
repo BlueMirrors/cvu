@@ -13,7 +13,7 @@ from importlib import import_module
 
 import numpy as np
 
-from cvu.interface.core import ICore
+from cvu.detector.interface import IDetector
 from cvu.detector.predictions import Predictions
 from cvu.detector.configs import COCO_CLASSES
 from cvu.preprocess.image.letterbox import letterbox
@@ -23,7 +23,7 @@ from cvu.postprocess.bbox import scale_coords
 from cvu.utils.backend import setup_backend
 
 
-class Yolov5(ICore):
+class Yolov5(IDetector):
     """Implements ICore for Yolov5
 
     Yolov5 Core represents a common interface to perform
