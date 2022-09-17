@@ -1,2 +1,2 @@
-include cvu/detector/yolov5/backends/weights/*.json
+include cvu/detector/weights.json
 include cvu/utils/backend/*.json
