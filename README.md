@@ -10,18 +10,18 @@ Computer Vision pipeline framework with SOTA components for dummies and experts.
 Whether you are developing an end-to-end computer vision pipeline or just looking to use some quick computer vision in your project, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can help! Designed to be used by both the expert and the novice, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> aims at making CV pipelines easier to build and consistent around platforms, devices and models.<br><br>
 
 
-
+Code Example <a href="https://youtu.be/MFXC8xVt2fg" target="_blank"><img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" height="15"></a>
 ```bash
 pip install cvu-python
 ```
 
 <br><br>
-CVU lets you create end-to-end pipelines with various SOTA/customizable components. With a focus on a common component interface, you naturally create a loosely coupled pipeline with most of the implementation details hidden. Because of this, you can combine any number of CVU components, in any order, to create a pipeline of your need. You can set and switch between one or multiple pipeline input sources (eg. an image, folder,  video, or live stream) and output sinks (eg. video file, image with results drawn, TXT/JSON dumps, etc.) 
+CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> lets you create end-to-end pipelines with various SOTA/customizable components. With a focus on a common component interface, you naturally create a loosely coupled pipeline with most of the implementation details hidden. Because of this, you can combine any number of CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> components, in any order, to create a pipeline of your need. You can set and switch between one or multiple pipeline input sources (eg. an image, folder,  video, or live stream) and output sinks (eg. video file, image with results drawn, TXT/JSON dumps, etc.) 
 
 
-It also comes with optional + customizable default settings which can run a benchmark on your platform/machine to optimally choose dependencies based on accuracy and latency preferences. CVU can also automatically switch/select target devices (CPU, GPU, TPU), computation backends (TF, PyTorch, ONNX, TensorRT, TFLite), and models (small, big, etc.) based on where the pipeline is running. 
+It also comes with optional + customizable default settings which can run a benchmark on your platform/machine to optimally choose dependencies based on accuracy and latency preferences. CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> can also automatically switch/select target devices (CPU, GPU, TPU), computation backends (TF, PyTorch, ONNX, TensorRT, TFLite), and models (small, big, etc.) based on where the pipeline is running. 
 
-Currently, CVU only provides Object Detection, but we are in the process to support Segmentation, Background removal, Tracking, and Image text matching out of the box.  
+Currently, CVU <img src="https://raw.githubusercontent.com/BlueMirrors/cvu/master/static/logo.png" width="12"> only provides Object Detection, but we are in the process to support Segmentation, Background removal, Tracking, and Image text matching out of the box.  
 
 # Index 📋
 
