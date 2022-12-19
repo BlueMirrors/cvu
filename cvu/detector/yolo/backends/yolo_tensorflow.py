@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in Tensorflow.
+"""This file contains Yolo's IDetectorModel implementation in Tensorflow.
 This model (tensorflow-backend) performs inference using SavedModel,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -14,15 +14,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import mixed_precision
 
-from cvu.interface.model import IModel
-from cvu.utils.general import get_path
-from cvu.detector.yolov5.backends.common import download_weights
+from cvu.detector.interface import IDetectorModel
 from cvu.postprocess.bbox import denormalize
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using Tensorflow.
+class Yolo(IDetectorModel):
+    """Implements IDetectorModel for Yolo using Tensorflow.
 
     This model (tensorflow-backend) performs inference, using SavedModel,
     on a numpy array, and returns result after performing NMS.
@@ -30,13 +28,11 @@ class Yolov5(IModel):
     Inputs are expected to be normalized in channels-last order with batch axis.
     """
 
-    def __init__(self, weight: str = "yolov5s", device='auto') -> None:
+    def __init__(self, weight: str, device='auto') -> None:
         """Initiate Model
 
         Args:
-            weight (str, optional): path to SavedModel weight files. Alternatively,
-            it also accepts identifiers (such as yolvo5s, yolov5m, etc.) to load
-            pretrained models. Defaults to "yolov5s".
+            weight (str): path to SavedModel weight files.
 
             device (str, optional): name of the device to be used. Valid devices can be
             "cpu", "gpu", "auto", "tpu". Defaults to "auto" which tries to use the
@@ -92,18 +88,10 @@ class Yolov5(IModel):
         """Internally loads SavedModel
 
         Args:
-            weight (str): path to SavedModel weight files or predefined-identifiers
-            (such as yolvo5s, yolov5m, etc.)
+            weight (str): path to SavedModel weight files
         """
-        # attempt to load predefined weights
         if not os.path.exists(weight):
-            weight += '_tensorflow'
-
-            # get path to pretrained weights
-            weight = get_path(__file__, "weights", weight)
-
-            # download weights if not already downloaded
-            download_weights(weight, "tensorflow", unzip=True)
+            raise FileNotFoundError(f"Unable to locate model weights {weight}")
 
         # set load_options needed for TPU (if needed)
         load_options = None
@@ -143,7 +131,7 @@ class Yolov5(IModel):
         Returns:
             str: information string
         """
-        return f"Yolov5-Tensorflow: {self._device}"
+        return f"Yolo Tensorflow: {self._device}"
 
     @staticmethod
     def _postprocess(outputs: np.ndarray) -> List[np.ndarray]:

@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in TFLite.
+"""This file contains Yolo's IDetectorModel implementation in TFLite.
 This model (tflite-backend) performs inference using TFLite,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -12,27 +12,24 @@ from typing import Tuple, List
 import numpy as np
 import tensorflow.lite as tflite
 
-from cvu.interface.model import IModel
-from cvu.utils.general import get_path
-from cvu.detector.yolov5.backends.common import download_weights
+from cvu.detector.interface import IDetectorModel
 from cvu.postprocess.backend_tf.nms.yolov5 import non_max_suppression_tf
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using TFLite.
+class Yolo(IDetectorModel):
+    """Implements IDetectorModel for Yolo using TFLite.
 
     This model (tflite-backend) performs inference, using TFLite,
     on a numpy array, and returns result after performing NMS.
 
     Inputs are expected to be normalized in channels-last order with batch axis.
     """
-    def __init__(self, weight: str = "yolov5s", device='auto') -> None:
+
+    def __init__(self, weight: str, device='auto') -> None:
         """Initiate Model
 
         Args:
-            weight (str, optional): path to SavedModel weight files. Alternatively,
-            it also accepts identifiers (such as yolvo5s, yolov5m, etc.) to load
-            pretrained models. Defaults to "yolov5s".
+            weight (str, optional): path to TFLite weight files.
 
             device (str, optional): name of the device to be used. Valid devices can be
             "cpu", "auto". Defaults to "auto" which tries to use the
@@ -71,18 +68,10 @@ class Yolov5(IModel):
         """Internally loads TFLite Model
 
         Args:
-            weight (str): path to TFLite weight files or predefined-identifiers
-            (such as yolvo5s, yolov5m, etc.)
+            weight (str): path to TFLite weight files
         """
-        # attempt to load predefined weights
         if not os.path.exists(weight):
-            weight += '.tflite'
-
-            # get path to pretrained weights
-            weight = get_path(__file__, "weights", weight)
-
-            # download weights if not already downloaded
-            download_weights(weight, "tflite")
+            raise FileNotFoundError(f"Unable to locate model weights {weight}")
 
         # load model
         self._model = tflite.Interpreter(model_path=weight)  # pylint: disable=maybe-no-member
@@ -129,7 +118,7 @@ class Yolov5(IModel):
         Returns:
             str: information string
         """
-        return f"Yolov5: {self._device}"
+        return f"Yolo TFLite-{self._device}"
 
     @staticmethod
     def _postprocess(outputs: np.ndarray) -> List[np.ndarray]:

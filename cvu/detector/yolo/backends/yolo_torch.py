@@ -1,4 +1,4 @@
-"""This file contains Yolov5's IModel implementation in PyTorch.
+"""This file contains Yolo's IDetectorModel implementation in PyTorch.
 This model (torch-backend) performs inference using Torch-script,
 on a given input numpy array, and returns result after performing
 nms and other backend specific postprocessings.
@@ -12,14 +12,12 @@ from typing import List
 import numpy as np
 import torch
 
-from cvu.interface.model import IModel
-from cvu.utils.general import get_path
-from cvu.detector.yolov5.backends.common import download_weights
+from cvu.detector.interface import IDetectorModel
 from cvu.postprocess.backend_torch.nms.yolov5 import non_max_suppression_torch
 
 
-class Yolov5(IModel):
-    """Implements IModel for Yolov5 using PyTorch.
+class Yolo(IDetectorModel):
+    """Implements IDetectorModel for Yolo using PyTorch.
 
     This model (torch-backend) performs inference, using Torch-script,
     on a numpy array, and returns result after performing NMS.
@@ -28,13 +26,11 @@ class Yolov5(IModel):
     (with/without batch axis).
     """
 
-    def __init__(self, weight: str = "yolov5s", device='auto') -> None:
+    def __init__(self, weight: str, device='auto') -> None:
         """Initiate Model
 
         Args:
-            weight (str, optional): path to jit-script .pt weight files. Alternatively,
-            it also accepts identifiers (such as yolvo5s, yolov5m, etc.) to load
-            pretrained models. Defaults to "yolov5s".
+            weight (str, optional): path to jit-script .pt weight files.
 
             device (str, optional): name of the device to be used. Valid devices can be
             "cpu", "gpu", "auto" or specific cuda devices such as
@@ -67,19 +63,10 @@ class Yolov5(IModel):
         """Internally loads JIT-Model
 
         Args:
-            weight (str): path to jit-script .pt weight files or predefined-identifiers
-            (such as yolvo5s, yolov5m, etc.)
+            weight (str): path to jit-script .pt weight files
         """
-        # attempt to load predefined weights
         if not os.path.exists(weight):
-            if self._device.type != 'cpu':
-                weight += '.cuda'
-
-            # get path to pretrained weights
-            weight = get_path(__file__, "weights", f"{weight}.torchscript.pt")
-
-            # download weights if not already downloaded
-            download_weights(weight, "torch")
+            raise FileNotFoundError(f"Unable to locate model weights {weight}")
 
         # load model
         self._model = torch.jit.load(weight, map_location=self._device)
@@ -113,7 +100,7 @@ class Yolov5(IModel):
         Returns:
             str: information string
         """
-        return f"Yolov5: {self._device.type}"
+        return f"Yolo Torch-{self._device.type}"
 
     def _preprocess(self, inputs: np.ndarray) -> torch.Tensor:
         """Process inputs for model inference.
