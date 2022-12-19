@@ -11,7 +11,7 @@ README = (HERE / "README.md").read_text()
 
 # This call to setup() does all the work
 setup(name="cvu-python",
-      version="0.0.1a1",
+      version="0.0.2",
       description="Computer Vision deployment tools for dummies and experts.",
       long_description=README,
       long_description_content_type="text/markdown",
