@@ -24,4 +24,4 @@ all the coco classes and create an output video with box drawn.
         writer.write(frame)
 ```
 """
-__version__ = "0.0.2"
+__version__ = "0.0.3"

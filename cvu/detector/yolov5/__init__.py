@@ -26,3 +26,4 @@ Example Usage
     predictions.draw(image)
 """
 from .core import Yolov5
+from .core_end2end import Yolov5End2End
